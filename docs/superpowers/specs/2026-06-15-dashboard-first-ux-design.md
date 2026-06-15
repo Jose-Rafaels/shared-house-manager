@@ -10,6 +10,8 @@ The Shared House Manager has 6 complete modules (Housemates, Bills, Cash Fund, D
 
 **Target users:** 2-5 close friends sharing one house, accessing the app equally from mobile and desktop.
 
+**No-auth context:** The app has no user accounts or authentication. All housemates share the same view — there is no "current user" concept. Attention items show everything relevant to the household, not personalized per person. Quick action modals show all housemates/options rather than filtering by "you."
+
 ## Design Overview
 
 Redesign the dashboard into **3 zones**, plus navigation badges and a bug fix:
@@ -69,7 +71,7 @@ Each item has:
 | Bill participant unpaid past due date | overdue | "Sopan belum bayar Listrik — jatuh tempo 3 hari lalu" |
 | Chore assignment due tomorrow | due_soon | "Giliran Anda: Bersihkan Dapur — besok" |
 | New debt settlement received | info | "Rina menyelesaikan utang Rp 50.000 ke Anda" |
-| Cash fund balance below configurable threshold | due_soon | "Saldo kas Rp 15.000 — rendah" |
+| Cash fund balance below threshold | due_soon | "Saldo kas Rp 15.000 — rendah" |
 | Shopping items with High priority unpurchased | due_soon | "3 barang prioritas tinggi belum dibeli" |
 | Bill due this week | info | "Tagihan Internet jatuh tempo 4 hari lagi" |
 
@@ -91,8 +93,8 @@ Each item has:
 
 ### Debts Card
 
-- Shows: Net balance — "Anda piutang Rp 100k" (green) or "Anda utang Rp 50k" (red)
-- Two-line: "Utang Anda: Rp 50k / Piutang Anda: Rp 100k"
+- Shows: Total outstanding — "Total utang: Rp 150.000" with breakdown
+- Two-line: "Piutang (orang lain utang Anda): Rp 100k / Utang (Anda utang orang lain): Rp 50k"
 - Tap to navigate to `/debts`
 
 ### Cash Fund Card
@@ -126,10 +128,10 @@ Each item has:
 | Action | Modal Form Fields | Auto-Defaults |
 |--------|-------------------|---------------|
 | + Bill | Type (dropdown), Amount, Housemates (checkboxes) | Current month, all active housemates checked |
-| + Shared Expense | Payer (dropdown), Amount, Participants (checkboxes) | Current user as payer, all active housemates as participants |
-| + Shopping Item | Name, Priority (dropdown) | Current user as added_by, Medium priority default |
-| ✓ Mark Chore Done | Checklist of your due chores | Only shows chores assigned to current session context |
-| 💰 Settle Debt | Creditor (dropdown), Amount | Shows only debts where you are the debtor |
+| + Shared Expense | Payer (dropdown), Amount, Participants (checkboxes) | All active housemates pre-selected as participants |
+| + Shopping Item | Name, Priority (dropdown) | Medium priority default |
+| ✓ Mark Chore Done | Checklist of due chores with assignee names | Shows all chores due this week, grouped by assignee |
+| 💰 Settle Debt | Debtor (dropdown), Creditor (dropdown), Amount | Shows all outstanding debt pairs |
 
 ### Implementation
 
@@ -182,7 +184,7 @@ Implementation: `AppServiceProvider` or a view composer that injects badge count
 
 ### Backend Changes
 
-- `DashboardService::attentionItems()`: New method that queries across modules
+- `DashboardService::attentionItems()`: New method that queries across modules. Cash fund threshold is a class constant (`CASH_FUND_LOW_THRESHOLD = 50000`, i.e. Rp 50.000)
 - `DashboardService::snapshotCards()`: New method returning enriched card data (progress, net balance, completion rates)
 - View composer: Inject nav badge counts into all views
 - Existing `DashboardService::summary()`: Minor adjustments to support new rendering
