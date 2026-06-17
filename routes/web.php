@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\CashFundController;
 use App\Http\Controllers\ChoreController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseController;
@@ -18,9 +17,6 @@ Route::delete('/members/{member}', [MemberController::class, 'destroy'])->name('
 
 Route::get('/expenses', [ExpenseController::class, 'index'])->name('expenses.index');
 Route::post('/expenses', [ExpenseController::class, 'store'])->name('expenses.store');
-
-Route::get('/cash-fund', [CashFundController::class, 'index'])->name('cash-fund.index');
-Route::post('/cash-fund', [CashFundController::class, 'store'])->name('cash-fund.store');
 
 Route::get('/settlements', [SettlementController::class, 'index'])->name('settlements.index');
 Route::post('/settlements', [SettlementController::class, 'store'])->name('settlements.store');

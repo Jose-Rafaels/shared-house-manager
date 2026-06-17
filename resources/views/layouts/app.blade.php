@@ -51,16 +51,6 @@
                     <span>{{ __('Expenses') }}</span>
                 </a>
 
-                {{-- Cash Fund --}}
-                <a href="{{ route('cash-fund.index') }}"
-                   class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-slate-300 hover:bg-slate-800 hover:text-white transition-colors {{ request()->routeIs('cash-fund.*') ? 'bg-slate-800 text-white border-l-4 border-sky-400' : '' }}"
-                   aria-current="{{ request()->routeIs('cash-fund.*') ? 'page' : 'false' }}">
-                    <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <span>{{ __('Cash Fund') }}</span>
-                </a>
-
                 {{-- Settlements --}}
                 <a href="{{ route('settlements.index') }}"
                    class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-slate-300 hover:bg-slate-800 hover:text-white transition-colors {{ request()->routeIs('settlements.*') ? 'bg-slate-800 text-white border-l-4 border-sky-400' : '' }}"
