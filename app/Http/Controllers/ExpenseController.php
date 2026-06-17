@@ -46,4 +46,37 @@ class ExpenseController extends Controller
 
         return back()->with('status', 'Expense created.');
     }
+
+    public function update(ExpenseRequest $request, Expense $expense, MoneySplitService $moneySplitService, ActivityLogService $activityLogService)
+    {
+        DB::transaction(function () use ($request, $expense, $moneySplitService, $activityLogService) {
+            $data = $request->validated();
+            $memberIds = array_values($data['member_ids']);
+            unset($data['member_ids']);
+
+            $expense->update($data);
+            $expense->splits()->delete();
+
+            $shares = $moneySplitService->splitEvenly((int) $expense->amount, count($memberIds));
+
+            foreach ($memberIds as $index => $memberId) {
+                $expense->splits()->create([
+                    'member_id' => $memberId,
+                    'amount_owed' => $shares[$index],
+                ]);
+            }
+
+            $activityLogService->log('expense.updated', "Updated expense {$expense->description}.", $expense);
+        });
+
+        return back()->with('status', 'Expense updated.');
+    }
+
+    public function destroy(Expense $expense, ActivityLogService $activityLogService)
+    {
+        $expense->delete();
+        $activityLogService->log('expense.deleted', "Deleted expense {$expense->description}.", $expense);
+
+        return back()->with('status', 'Expense deleted.');
+    }
 }
