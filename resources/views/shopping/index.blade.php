@@ -46,13 +46,32 @@
         <section class="space-y-5">
             @forelse ($items as $item)
                 <div class="rounded-2xl bg-white p-5 shadow-sm">
-                    <div class="flex items-center justify-between">
-                        <div class="font-semibold">{{ $item->name }}</div>
-                        <span class="rounded-full bg-slate-100 px-3 py-1 text-sm">{{ __($item->priority) }}</span>
-                    </div>
-                    <p class="mt-2 text-sm text-slate-500">{{ $item->notes }}</p>
+                    <form method="POST" action="{{ route('shopping.update', $item) }}" class="space-y-3" novalidate>
+                        @csrf @method('PUT')
+                        <div class="flex items-center gap-3">
+                            <input name="name" value="{{ old('name', $item->name) }}" class="flex-1 border border-slate-300 focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition">
+                            <select name="priority" class="border border-slate-300 focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition">
+                                <option value="High" {{ old('priority', $item->priority) === 'High' ? 'selected' : '' }}>{{ __('High') }}</option>
+                                <option value="Medium" {{ old('priority', $item->priority) === 'Medium' ? 'selected' : '' }}>{{ __('Medium') }}</option>
+                                <option value="Low" {{ old('priority', $item->priority) === 'Low' ? 'selected' : '' }}>{{ __('Low') }}</option>
+                            </select>
+                        </div>
+                        <select name="added_by_member_id" class="w-full border border-slate-300 focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition">
+                            <option value="">{{ __('No member') }}</option>
+                            @foreach ($members as $member)
+                                <option value="{{ $member->id }}" {{ old('added_by_member_id', $item->added_by_member_id) == $member->id ? 'selected' : '' }}>{{ $member->name }}</option>
+                            @endforeach
+                        </select>
+                        <textarea name="notes" class="w-full border border-slate-300 focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition" placeholder="{{ __('Notes') }}">{{ old('notes', $item->notes) }}</textarea>
+                        <div class="flex items-center gap-3">
+                            <button class="inline-flex items-center justify-center bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 min-h-[44px]">{{ __('Update') }}</button>
+                            @if ($item->purchased_at)
+                                <span class="text-sm text-emerald-700">{{ __('Purchased on :date', ['date' => $item->purchased_at->translatedFormat('d M Y')]) }}</span>
+                            @endif
+                        </div>
+                    </form>
                     @if (!$item->purchased_at)
-                        <form method="POST" action="{{ route('shopping.purchase.store', $item) }}" class="mt-4 grid gap-3 md:grid-cols-4" novalidate>
+                        <form method="POST" action="{{ route('shopping.purchase.store', $item) }}" class="mt-3 grid gap-3 md:grid-cols-4" novalidate>
                             @csrf
                             <select name="purchased_by_member_id" class="border-slate-300 md:col-span-2 focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition">
                                 <option value="">{{ __('No member') }}</option>
@@ -65,9 +84,11 @@
                             <textarea name="notes" class="border-slate-300 md:col-span-4 focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition" placeholder="{{ __('Notes') }}"></textarea>
                             <button class="inline-flex items-center justify-center bg-slate-900 px-5 py-3 text-base font-medium text-white transition hover:bg-slate-800 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 min-h-[44px] md:col-span-4">{{ __('Mark Purchased') }}</button>
                         </form>
-                    @else
-                        <div class="mt-4 text-sm text-emerald-700">{{ __('Purchased on :date', ['date' => $item->purchased_at->translatedFormat('d M Y')]) }}</div>
                     @endif
+                    <form method="POST" action="{{ route('shopping.destroy', $item) }}" class="mt-2">
+                        @csrf @method('DELETE')
+                        <button class="inline-flex items-center min-h-[44px] text-sm font-medium text-rose-600 transition hover:text-rose-800 active:scale-[0.97]">{{ __('Delete') }}</button>
+                    </form>
                 </div>
             @empty
                 <div class="rounded-2xl bg-white p-8 shadow-sm text-center">

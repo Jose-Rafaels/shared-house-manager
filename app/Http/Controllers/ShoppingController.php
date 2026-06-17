@@ -34,4 +34,20 @@ class ShoppingController extends Controller
 
         return back()->with('status', 'Shopping item marked purchased.');
     }
+
+    public function update(ShoppingItemRequest $request, ShoppingItem $shoppingItem, ActivityLogService $activityLogService)
+    {
+        $shoppingItem->update($request->validated());
+        $activityLogService->log('shopping.updated', "Updated shopping item {$shoppingItem->name}.", $shoppingItem);
+
+        return back()->with('status', 'Shopping item updated.');
+    }
+
+    public function destroy(ShoppingItem $shoppingItem, ActivityLogService $activityLogService)
+    {
+        $shoppingItem->delete();
+        $activityLogService->log('shopping.deleted', "Deleted shopping item {$shoppingItem->name}.", $shoppingItem);
+
+        return back()->with('status', 'Shopping item deleted.');
+    }
 }
