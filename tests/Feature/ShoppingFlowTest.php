@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\Member;
 use App\Models\ShoppingItem;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
