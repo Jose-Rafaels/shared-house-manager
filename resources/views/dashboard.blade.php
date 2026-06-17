@@ -19,10 +19,6 @@
             <div class="mt-2 text-3xl font-bold">Rp{{ number_format($expensesTotal) }}</div>
         </div>
         <div class="rounded-2xl bg-white p-5 shadow-sm">
-            <div class="text-sm text-slate-500">{{ __('Cash Fund Balance') }}</div>
-            <div class="mt-2 text-3xl font-bold">Rp{{ number_format($cashBalance) }}</div>
-        </div>
-        <div class="rounded-2xl bg-white p-5 shadow-sm">
             <div class="text-sm text-slate-500">{{ __('Shopping Pending') }}</div>
             <div class="mt-2 text-3xl font-bold">{{ $shoppingPending }}</div>
         </div>

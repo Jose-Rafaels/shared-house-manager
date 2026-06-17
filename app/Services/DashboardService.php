@@ -11,7 +11,6 @@ use Carbon\Carbon;
 class DashboardService
 {
     public function __construct(
-        private readonly CashFundService $cashFundService,
         private readonly DebtLedgerService $debtLedgerService,
     ) {}
 
@@ -33,7 +32,6 @@ class DashboardService
         return [
             'currentExpenses' => $currentExpenses,
             'expensesTotal' => (int) $expensesTotal,
-            'cashBalance' => $this->cashFundService->balance(),
             'outstandingDebts' => $this->debtLedgerService->outstandingBalances(),
             'currentChores' => ChoreAssignment::query()
                 ->with(['chore', 'member'])
