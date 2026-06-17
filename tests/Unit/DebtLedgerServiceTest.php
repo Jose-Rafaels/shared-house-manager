@@ -2,9 +2,10 @@
 
 namespace Tests\Unit;
 
-use App\Models\DebtSettlement;
-use App\Models\Housemate;
-use App\Models\SharedExpense;
+use App\Models\Expense;
+use App\Models\Member;
+use App\Models\Settlement;
+use App\Services\DebtLedgerService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -14,35 +15,44 @@ class DebtLedgerServiceTest extends TestCase
 
     public function test_outstanding_balances_exclude_payer_and_subtract_settlements(): void
     {
-        $payer = Housemate::query()->create(['name' => 'Payer']);
-        $debtorA = Housemate::query()->create(['name' => 'Debtor A']);
-        $debtorB = Housemate::query()->create(['name' => 'Debtor B']);
+        $payer = Member::query()->create(['name' => 'Alice']);
+        $debtorA = Member::query()->create(['name' => 'Bob']);
+        $debtorB = Member::query()->create(['name' => 'Charlie']);
 
-        $expense = SharedExpense::query()->create([
-            'title' => 'Groceries',
-            'payer_housemate_id' => $payer->id,
+        $expense = Expense::query()->create([
+            'payer_id' => $payer->id,
+            'category_id' => null,
             'amount' => 30000,
-            'expense_date' => now()->toDateString(),
+            'description' => 'Test expense',
+            'expense_date' => '2026-06-01',
         ]);
 
-        $expense->participants()->createMany([
-            ['housemate_id' => $payer->id, 'share_amount' => 10000],
-            ['housemate_id' => $debtorA->id, 'share_amount' => 10000],
-            ['housemate_id' => $debtorB->id, 'share_amount' => 10000],
+        // Split 30000 across 2 non-payer members: 15000 each
+        $expense->splits()->createMany([
+            ['member_id' => $debtorA->id, 'amount_owed' => 15000],
+            ['member_id' => $debtorB->id, 'amount_owed' => 15000],
         ]);
 
-        DebtSettlement::query()->create([
-            'shared_expense_id' => $expense->id,
-            'debtor_housemate_id' => $debtorA->id,
-            'creditor_housemate_id' => $payer->id,
+        // Settle 4000 from debtorA to payer
+        Settlement::query()->create([
+            'from_member_id' => $debtorA->id,
+            'to_member_id' => $payer->id,
             'amount' => 4000,
-            'settled_on' => now()->toDateString(),
+            'settlement_date' => '2026-06-05',
+            'note' => null,
         ]);
 
-        $balances = app(\App\Services\DebtLedgerService::class)->outstandingBalances();
+        $service = new DebtLedgerService;
+        $balances = $service->outstandingBalances();
 
+        // debtorA owes 15000 - 4000 = 11000
+        // debtorB owes 15000
         $this->assertCount(2, $balances);
-        $this->assertSame(6000, $balances->firstWhere('debtor_housemate_id', $debtorA->id)->amount);
-        $this->assertSame(10000, $balances->firstWhere('debtor_housemate_id', $debtorB->id)->amount);
+
+        $debtorABalance = $balances->first(fn ($b) => $b->debtor_member_id === $debtorA->id);
+        $this->assertEquals(11000, $debtorABalance->amount);
+
+        $debtorBBalance = $balances->first(fn ($b) => $b->debtor_member_id === $debtorB->id);
+        $this->assertEquals(15000, $debtorBBalance->amount);
     }
 }

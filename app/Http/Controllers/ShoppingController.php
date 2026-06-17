@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ShoppingItemRequest;
 use App\Http\Requests\ShoppingPurchaseRequest;
-use App\Models\Housemate;
+use App\Models\Member;
 use App\Models\ShoppingItem;
 use App\Services\ActivityLogService;
 
@@ -14,7 +14,7 @@ class ShoppingController extends Controller
     {
         return view('shopping.index', [
             'items' => ShoppingItem::query()->with(['addedBy', 'purchases.purchasedBy'])->latest()->get(),
-            'housemates' => Housemate::active()->orderBy('name')->get(),
+            'members' => Member::query()->orderBy('name')->get(),
         ]);
     }
 

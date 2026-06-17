@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ChoreRequest;
 use App\Models\Chore;
 use App\Models\ChoreAssignment;
-use App\Models\Housemate;
+use App\Models\Member;
 use App\Services\ActivityLogService;
 use App\Services\ChoreAssignmentService;
 use Illuminate\Support\Facades\DB;
@@ -15,8 +15,8 @@ class ChoreController extends Controller
     public function index()
     {
         return view('chores.index', [
-            'chores' => Chore::query()->with(['rotations.housemate', 'assignments.housemate'])->latest()->get(),
-            'housemates' => Housemate::active()->orderBy('name')->get(),
+            'chores' => Chore::query()->with(['rotations.member', 'assignments.member'])->latest()->get(),
+            'members' => Member::query()->orderBy('name')->get(),
         ]);
     }
 
@@ -24,14 +24,14 @@ class ChoreController extends Controller
     {
         DB::transaction(function () use ($request, $choreAssignmentService, $activityLogService) {
             $data = $request->validated();
-            $housemateIds = array_values($data['housemate_ids']);
-            unset($data['housemate_ids']);
+            $memberIds = array_values($data['member_ids']);
+            unset($data['member_ids']);
 
             $chore = Chore::query()->create($data);
 
-            foreach ($housemateIds as $index => $housemateId) {
+            foreach ($memberIds as $index => $memberId) {
                 $chore->rotations()->create([
-                    'housemate_id' => $housemateId,
+                    'member_id' => $memberId,
                     'sort_order' => $index + 1,
                 ]);
             }

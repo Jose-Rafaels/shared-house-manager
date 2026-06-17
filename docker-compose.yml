@@ -12,3 +12,10 @@ services:
       - ./:/var/www/html
     ports:
       - "8000:80"
+
+    networks:
+      - mysql_default
+
+networks:
+  mysql_default:
+    external: true

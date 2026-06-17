@@ -15,7 +15,7 @@ class CashFundEntryRequest extends FormRequest
     {
         return [
             'type' => ['required', 'in:contribution,expense'],
-            'housemate_id' => ['nullable', 'integer', 'exists:housemates,id'],
+            'member_id' => ['nullable', 'integer', 'exists:members,id'],
             'title' => ['required', 'string', 'max:255'],
             'amount' => ['required', 'integer', 'min:1'],
             'entry_date' => ['required', 'date'],

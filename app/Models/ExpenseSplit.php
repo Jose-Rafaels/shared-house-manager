@@ -5,17 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class ChoreRotation extends Model
+class ExpenseSplit extends Model
 {
     protected $fillable = [
-        'chore_id',
+        'expense_id',
         'member_id',
-        'sort_order',
+        'amount_owed',
     ];
 
-    public function chore(): BelongsTo
+    public function expense(): BelongsTo
     {
-        return $this->belongsTo(Chore::class);
+        return $this->belongsTo(Expense::class);
     }
 
     public function member(): BelongsTo

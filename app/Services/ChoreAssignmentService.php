@@ -28,7 +28,7 @@ class ChoreAssignmentService
                     'assigned_for_date' => $assignedFor->toDateString(),
                 ],
                 [
-                    'housemate_id' => $rotation->housemate_id,
+                    'member_id' => $rotation->member_id,
                 ],
             );
         }

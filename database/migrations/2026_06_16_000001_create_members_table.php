@@ -8,16 +8,17 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('housemates', function (Blueprint $table) {
+        Schema::create('members', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->timestamp('archived_at')->nullable();
+            $table->string('phone', 20)->nullable();
+            $table->timestamp('joined_at')->nullable();
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('housemates');
+        Schema::dropIfExists('members');
     }
 };

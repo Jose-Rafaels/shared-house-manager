@@ -17,8 +17,8 @@ class ChoreRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'rotation_start_date' => ['required', 'date'],
-            'housemate_ids' => ['required', 'array', 'min:1'],
-            'housemate_ids.*' => ['integer', 'exists:housemates,id'],
+            'member_ids' => ['required', 'array', 'min:1'],
+            'member_ids.*' => ['integer', 'exists:members,id'],
         ];
     }
 }

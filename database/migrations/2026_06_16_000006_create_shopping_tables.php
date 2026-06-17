@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('priority');
             $table->text('notes')->nullable();
-            $table->foreignId('added_by_housemate_id')->nullable()->constrained('housemates')->nullOnDelete();
+            $table->foreignId('added_by_member_id')->nullable()->constrained('members')->nullOnDelete();
             $table->timestamp('purchased_at')->nullable();
             $table->timestamps();
         });
@@ -21,7 +21,7 @@ return new class extends Migration
         Schema::create('shopping_purchases', function (Blueprint $table) {
             $table->id();
             $table->foreignId('shopping_item_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('purchased_by_housemate_id')->nullable()->constrained('housemates')->nullOnDelete();
+            $table->foreignId('purchased_by_member_id')->nullable()->constrained('members')->nullOnDelete();
             $table->unsignedBigInteger('amount')->nullable();
             $table->date('purchased_on');
             $table->text('notes')->nullable();

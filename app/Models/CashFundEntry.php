@@ -2,17 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CashFundEntry extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'type',
-        'housemate_id',
+        'member_id',
         'title',
         'amount',
         'entry_date',
@@ -24,8 +21,8 @@ class CashFundEntry extends Model
         'entry_date' => 'date',
     ];
 
-    public function housemate(): BelongsTo
+    public function member(): BelongsTo
     {
-        return $this->belongsTo(Housemate::class);
+        return $this->belongsTo(Member::class);
     }
 }

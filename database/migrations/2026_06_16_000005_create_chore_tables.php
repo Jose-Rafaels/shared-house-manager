@@ -19,16 +19,16 @@ return new class extends Migration
         Schema::create('chore_rotations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('chore_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('housemate_id')->constrained()->restrictOnDelete();
+            $table->foreignId('member_id')->constrained('members')->restrictOnDelete();
             $table->unsignedInteger('sort_order');
             $table->timestamps();
-            $table->unique(['chore_id', 'housemate_id']);
+            $table->unique(['chore_id', 'member_id']);
         });
 
         Schema::create('chore_assignments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('chore_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('housemate_id')->constrained()->restrictOnDelete();
+            $table->foreignId('member_id')->constrained('members')->restrictOnDelete();
             $table->date('assigned_for_date');
             $table->timestamp('completed_at')->nullable();
             $table->timestamps();

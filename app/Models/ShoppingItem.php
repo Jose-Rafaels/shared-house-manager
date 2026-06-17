@@ -2,20 +2,17 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ShoppingItem extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'name',
         'priority',
         'notes',
-        'added_by_housemate_id',
+        'added_by_member_id',
         'purchased_at',
     ];
 
@@ -25,7 +22,7 @@ class ShoppingItem extends Model
 
     public function addedBy(): BelongsTo
     {
-        return $this->belongsTo(Housemate::class, 'added_by_housemate_id');
+        return $this->belongsTo(Member::class, 'added_by_member_id');
     }
 
     public function purchases(): HasMany

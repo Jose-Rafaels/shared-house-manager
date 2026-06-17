@@ -14,7 +14,7 @@ class ShoppingPurchaseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'purchased_by_housemate_id' => ['nullable', 'integer', 'exists:housemates,id'],
+            'purchased_by_member_id' => ['nullable', 'integer', 'exists:members,id'],
             'amount' => ['nullable', 'integer', 'min:1'],
             'purchased_on' => ['required', 'date'],
             'notes' => ['nullable', 'string'],

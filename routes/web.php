@@ -1,31 +1,29 @@
 <?php
 
-use App\Http\Controllers\BillController;
 use App\Http\Controllers\CashFundController;
 use App\Http\Controllers\ChoreController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\DebtController;
-use App\Http\Controllers\HousemateController;
+use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\MemberController;
+use App\Http\Controllers\SettlementController;
 use App\Http\Controllers\ShoppingController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', DashboardController::class)->name('dashboard');
 
-Route::get('/housemates', [HousemateController::class, 'index'])->name('housemates.index');
-Route::post('/housemates', [HousemateController::class, 'store'])->name('housemates.store');
-Route::put('/housemates/{housemate}', [HousemateController::class, 'update'])->name('housemates.update');
-Route::patch('/housemates/{housemate}/archive', [HousemateController::class, 'archive'])->name('housemates.archive');
+Route::get('/members', [MemberController::class, 'index'])->name('members.index');
+Route::post('/members', [MemberController::class, 'store'])->name('members.store');
+Route::put('/members/{member}', [MemberController::class, 'update'])->name('members.update');
+Route::delete('/members/{member}', [MemberController::class, 'destroy'])->name('members.destroy');
 
-Route::get('/bills', [BillController::class, 'index'])->name('bills.index');
-Route::post('/bills', [BillController::class, 'store'])->name('bills.store');
-Route::post('/bills/{bill}/payments', [BillController::class, 'markPaid'])->name('bills.payments.store');
+Route::get('/expenses', [ExpenseController::class, 'index'])->name('expenses.index');
+Route::post('/expenses', [ExpenseController::class, 'store'])->name('expenses.store');
 
 Route::get('/cash-fund', [CashFundController::class, 'index'])->name('cash-fund.index');
 Route::post('/cash-fund', [CashFundController::class, 'store'])->name('cash-fund.store');
 
-Route::get('/debts', [DebtController::class, 'index'])->name('debts.index');
-Route::post('/debts/expenses', [DebtController::class, 'store'])->name('debts.expenses.store');
-Route::post('/debts/settlements', [DebtController::class, 'settle'])->name('debts.settlements.store');
+Route::get('/settlements', [SettlementController::class, 'index'])->name('settlements.index');
+Route::post('/settlements', [SettlementController::class, 'store'])->name('settlements.store');
 
 Route::get('/chores', [ChoreController::class, 'index'])->name('chores.index');
 Route::post('/chores', [ChoreController::class, 'store'])->name('chores.store');

@@ -17,7 +17,7 @@ class ShoppingItemRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'priority' => ['required', 'in:High,Medium,Low'],
             'notes' => ['nullable', 'string'],
-            'added_by_housemate_id' => ['nullable', 'integer', 'exists:housemates,id'],
+            'added_by_member_id' => ['nullable', 'integer', 'exists:members,id'],
         ];
     }
 }

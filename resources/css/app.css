@@ -5,6 +5,12 @@
     --card-shadow: 0 18px 45px -24px rgba(15, 23, 42, 0.28);
 }
 
+/* Full height layout for sidebar */
+html,
+body {
+    height: 100%;
+}
+
 body {
     background:
         radial-gradient(circle at top right, rgba(14, 165, 233, 0.10), transparent 35%),
@@ -15,4 +21,85 @@ body {
 
 .shadow-sm {
     box-shadow: var(--card-shadow);
+}
+
+/* Sidebar scrollbar styling */
+#sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+#sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#sidebar::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 3px;
+}
+
+#sidebar::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+/* Firefox scrollbar */
+#sidebar {
+    scrollbar-width: thin;
+    scrollbar-color: #475569 transparent;
+}
+
+/* Smooth transitions for sidebar */
+#sidebar {
+    transition: transform 300ms ease-out;
+}
+
+#sidebar-backdrop {
+    transition: opacity 200ms ease;
+}
+
+/* Focus styles for accessibility */
+#sidebar a:focus-visible,
+#sidebar-toggle:focus-visible,
+#sidebar-close:focus-visible {
+    outline: 2px solid #38bdf8;
+    outline-offset: 2px;
+}
+
+/* Ensure main content scrolls properly */
+main[class*="overflow-y-auto"] {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+}
+
+main[class*="overflow-y-auto"]::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+main[class*="overflow-y-auto"]::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+main[class*="overflow-y-auto"]::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+main[class*="overflow-y-auto"]::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Page-load content entrance animation */
+@keyframes content-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+main {
+  animation: content-fade-in 0.25s ease-out;
 }

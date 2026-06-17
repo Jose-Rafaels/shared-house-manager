@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('cash_fund_entries', function (Blueprint $table) {
             $table->id();
             $table->string('type');
-            $table->foreignId('housemate_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('member_id')->nullable()->constrained('members')->nullOnDelete();
             $table->string('title');
             $table->unsignedBigInteger('amount');
             $table->date('entry_date');

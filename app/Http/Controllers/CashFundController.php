@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CashFundEntryRequest;
 use App\Models\CashFundEntry;
-use App\Models\Housemate;
+use App\Models\Member;
 use App\Services\ActivityLogService;
 use App\Services\CashFundService;
 
@@ -13,8 +13,8 @@ class CashFundController extends Controller
     public function index(CashFundService $cashFundService)
     {
         return view('cash-fund.index', [
-            'entries' => CashFundEntry::query()->with('housemate')->latest('entry_date')->get(),
-            'housemates' => Housemate::active()->orderBy('name')->get(),
+            'entries' => CashFundEntry::query()->with('member')->latest('entry_date')->get(),
+            'members' => Member::query()->orderBy('name')->get(),
             'balance' => $cashFundService->balance(),
         ]);
     }

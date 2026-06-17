@@ -2,17 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ChoreAssignment extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'chore_id',
-        'housemate_id',
+        'member_id',
         'assigned_for_date',
         'completed_at',
     ];
@@ -27,8 +24,8 @@ class ChoreAssignment extends Model
         return $this->belongsTo(Chore::class);
     }
 
-    public function housemate(): BelongsTo
+    public function member(): BelongsTo
     {
-        return $this->belongsTo(Housemate::class);
+        return $this->belongsTo(Member::class);
     }
 }
