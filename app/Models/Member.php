@@ -37,11 +37,6 @@ class Member extends Model
         return $this->hasMany(Settlement::class, 'to_member_id');
     }
 
-    public function cashFundEntries(): HasMany
-    {
-        return $this->hasMany(CashFundEntry::class, 'member_id');
-    }
-
     public function choreRotations(): HasMany
     {
         return $this->hasMany(ChoreRotation::class, 'member_id');
