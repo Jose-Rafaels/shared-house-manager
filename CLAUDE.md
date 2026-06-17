@@ -21,10 +21,10 @@ All commands below use `docker exec -it shared-house-manager-app`:
 docker exec -it shared-house-manager-app php artisan test
 
 # Run a specific test file
-docker exec -it shared-house-manager-app php artisan test tests/Unit/CashFundServiceTest.php
+docker exec -it shared-house-manager-app php artisan test tests/Unit/ChoreAssignmentServiceTest.php
 
 # Run a specific test method
-docker exec -it shared-house-manager-app php artisan test --filter test_balance_is_contributions_minus_expenses
+docker exec -it shared-house-manager-app php artisan test --filter test_assignments_rotate_in_order
 
 # Run unit tests only
 docker exec -it shared-house-manager-app php artisan test --testsuite=Unit
@@ -62,7 +62,6 @@ Six feature modules, each with a consistent pattern:
 |--------|-----------|------------|--------|
 | Housemates | `HousemateController` | — | CRUD + archive |
 | Bills | `BillController` | `MoneySplitService` | Create, list, mark paid |
-| Cash Fund | `CashFundController` | `CashFundService` | Create entries, view balance |
 | Debts | `DebtController` | `DebtLedgerService`, `MoneySplitService` | Shared expenses, settlements |
 | Chores | `ChoreController` | `ChoreAssignmentService` | Create, rotate, complete |
 | Shopping | `ShoppingController` | — | Add items, mark purchased |
@@ -88,7 +87,6 @@ Controller returns view() with data
 - **SharedExpense** — tracks one housemate paying for a group. Generates debts via `SharedExpenseParticipant`.
 - **DebtSettlement** — records partial/full debt repayments.
 - **Chore** — has `ChoreRotation` (ordered list of housemates) and `ChoreAssignment` (weekly assignments generated ahead).
-- **CashFundEntry** — typed as `contribution` or `expense`. Balance = sum(contributions) - sum(expenses).
 - **ShoppingItem** — has priority (High/Medium/Low) and purchase records.
 - **ActivityLog** — polymorphic audit trail with `subject_type`/`subject_id` and JSON `metadata`.
 
