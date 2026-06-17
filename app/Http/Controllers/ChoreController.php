@@ -50,4 +50,39 @@ class ChoreController extends Controller
 
         return back()->with('status', 'Chore marked complete.');
     }
+
+    public function update(ChoreRequest $request, Chore $chore, ChoreAssignmentService $choreAssignmentService, ActivityLogService $activityLogService)
+    {
+        DB::transaction(function () use ($request, $chore, $choreAssignmentService, $activityLogService) {
+            $data = $request->validated();
+            $memberIds = array_values($data['member_ids']);
+            unset($data['member_ids']);
+
+            $chore->update($data);
+            $chore->rotations()->delete();
+
+            foreach ($memberIds as $index => $memberId) {
+                $chore->rotations()->create([
+                    'member_id' => $memberId,
+                    'sort_order' => $index + 1,
+                ]);
+            }
+
+            // Delete incomplete assignments so they get regenerated
+            $chore->assignments()->whereNull('completed_at')->delete();
+
+            $choreAssignmentService->ensureAssignments($chore->fresh(), 12);
+            $activityLogService->log('chore.updated', "Updated chore {$chore->name}.", $chore);
+        });
+
+        return back()->with('status', 'Chore updated.');
+    }
+
+    public function destroy(Chore $chore, ActivityLogService $activityLogService)
+    {
+        $chore->delete();
+        $activityLogService->log('chore.deleted', "Deleted chore {$chore->name}.", $chore);
+
+        return back()->with('status', 'Chore deleted.');
+    }
 }

@@ -39,30 +39,56 @@
             </form>
         </section>
 
-        {{-- Chore list — Principle #5: fixed heading hierarchy --}}
+        {{-- Chore list --}}
         <section class="space-y-5">
             @forelse ($chores as $chore)
                 <div class="rounded-2xl bg-white p-5 shadow-sm">
-                    <h3 class="text-lg font-semibold">{{ $chore->name }}</h3>
-                    <p class="mt-1 text-sm text-slate-500">{{ $chore->description }}</p>
-                    <div class="mt-4">
-                        <h4 class="font-medium">{{ __('Upcoming Assignments') }}</h4>
-                        <div class="mt-2 space-y-2">
-                            @foreach ($chore->assignments->take(4) as $assignment)
-                                <div class="flex items-center justify-between border border-slate-200 p-3">
-                                    <span>{{ __(':name for :date', ['name' => $assignment->member->name, 'date' => $assignment->assigned_for_date->translatedFormat('d M Y')]) }}</span>
-                                    @if (!$assignment->completed_at)
-                                        <form method="POST" action="{{ route('chores.assignments.complete', $assignment) }}">
-                                            @csrf @method('PATCH')
-                                            <button class="inline-flex items-center min-h-[44px] text-sm font-medium text-emerald-700 transition hover:text-emerald-800 active:scale-[0.97]">{{ __('Mark complete') }}</button>
-                                        </form>
-                                    @else
-                                        <span class="text-sm text-slate-500">{{ __('Done') }}</span>
-                                    @endif
-                                </div>
+                    <form method="POST" action="{{ route('chores.update', $chore) }}" class="space-y-3" novalidate>
+                        @csrf @method('PUT')
+                        <div>
+                            <input name="name" value="{{ old('name', $chore->name) }}" class="w-full border @error('name') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition" placeholder="{{ __('Clean bathroom') }}">
+                        </div>
+                        <div>
+                            <textarea name="description" class="w-full border @error('description') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition" placeholder="{{ __('Description') }}">{{ old('description', $chore->description) }}</textarea>
+                        </div>
+                        <div>
+                            <input type="date" name="rotation_start_date" value="{{ old('rotation_start_date', $chore->rotation_start_date->format('Y-m-d')) }}" class="w-full border @error('rotation_start_date') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition">
+                        </div>
+                        <div class="space-y-2">
+                            <p class="text-sm font-medium text-slate-700">{{ __('Rotation order') }}</p>
+                            @foreach ($members as $member)
+                                <label class="flex cursor-pointer items-center gap-2">
+                                    <input type="checkbox" name="member_ids[]" value="{{ $member->id }}" class="rounded border-slate-300" {{ in_array($member->id, old('member_ids', $chore->rotations->pluck('member_id')->all())) ? 'checked' : '' }}>
+                                    {{ $member->name }}
+                                </label>
                             @endforeach
                         </div>
-                    </div>
+                        <button class="inline-flex items-center justify-center bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 min-h-[44px]">{{ __('Update') }}</button>
+                    </form>
+                    @if ($chore->assignments->count())
+                        <div class="mt-4">
+                            <h4 class="font-medium">{{ __('Upcoming Assignments') }}</h4>
+                            <div class="mt-2 space-y-2">
+                                @foreach ($chore->assignments->take(4) as $assignment)
+                                    <div class="flex items-center justify-between border border-slate-200 p-3">
+                                        <span>{{ __(':name for :date', ['name' => $assignment->member->name, 'date' => $assignment->assigned_for_date->translatedFormat('d M Y')]) }}</span>
+                                        @if (!$assignment->completed_at)
+                                            <form method="POST" action="{{ route('chores.assignments.complete', $assignment) }}">
+                                                @csrf @method('PATCH')
+                                                <button class="inline-flex items-center min-h-[44px] text-sm font-medium text-emerald-700 transition hover:text-emerald-800 active:scale-[0.97]">{{ __('Mark complete') }}</button>
+                                            </form>
+                                        @else
+                                            <span class="text-sm text-slate-500">{{ __('Done') }}</span>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+                    <form method="POST" action="{{ route('chores.destroy', $chore) }}" class="mt-2">
+                        @csrf @method('DELETE')
+                        <button class="inline-flex items-center min-h-[44px] text-sm font-medium text-rose-600 transition hover:text-rose-800 active:scale-[0.97]">{{ __('Delete') }}</button>
+                    </form>
                 </div>
             @empty
                 <div class="rounded-2xl bg-white p-8 shadow-sm text-center">
