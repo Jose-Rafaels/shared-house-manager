@@ -75,18 +75,32 @@
             <div class="mt-4 space-y-3">
                 @forelse ($settlements as $settlement)
                     <div class="border border-slate-200 p-4">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <span class="font-medium">{{ $settlement->fromMember->name }}</span>
-                                <span class="text-slate-500"> → </span>
-                                <span class="font-medium">{{ $settlement->toMember->name }}</span>
+                        <form method="POST" action="{{ route('settlements.update', $settlement) }}" class="space-y-3" novalidate>
+                            @csrf @method('PUT')
+                            <div class="flex items-center justify-between">
+                                <select name="from_member_id" class="border border-slate-300 focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition">
+                                    @foreach ($members as $member)
+                                        <option value="{{ $member->id }}" {{ old('from_member_id', $settlement->from_member_id) == $member->id ? 'selected' : '' }}>{{ $member->name }}</option>
+                                    @endforeach
+                                </select>
+                                <span class="text-slate-500">→</span>
+                                <select name="to_member_id" class="border border-slate-300 focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition">
+                                    @foreach ($members as $member)
+                                        <option value="{{ $member->id }}" {{ old('to_member_id', $settlement->to_member_id) == $member->id ? 'selected' : '' }}>{{ $member->name }}</option>
+                                    @endforeach
+                                </select>
                             </div>
-                            <div class="text-lg font-bold">Rp{{ number_format($settlement->amount) }}</div>
-                        </div>
-                        <div class="mt-1 text-sm text-slate-500">{{ $settlement->settlement_date->translatedFormat('d M Y') }}</div>
-                        @if ($settlement->note)
-                            <p class="mt-1 text-sm text-slate-400">{{ $settlement->note }}</p>
-                        @endif
+                            <div class="flex flex-wrap items-center gap-3">
+                                <input type="number" name="amount" value="{{ old('amount', $settlement->amount) }}" class="w-32 border border-slate-300 focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition">
+                                <input type="date" name="settlement_date" value="{{ old('settlement_date', $settlement->settlement_date->format('Y-m-d')) }}" class="border border-slate-300 focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition">
+                                <button class="inline-flex items-center justify-center bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 min-h-[44px]">{{ __('Update') }}</button>
+                            </div>
+                            <textarea name="note" class="w-full border border-slate-300 focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition" placeholder="{{ __('Note (optional)') }}">{{ old('note', $settlement->note) }}</textarea>
+                        </form>
+                        <form method="POST" action="{{ route('settlements.destroy', $settlement) }}" class="mt-2">
+                            @csrf @method('DELETE')
+                            <button class="inline-flex items-center min-h-[44px] text-sm font-medium text-rose-600 transition hover:text-rose-800 active:scale-[0.97]">{{ __('Delete') }}</button>
+                        </form>
                     </div>
                 @empty
                     <div class="py-8 text-center">

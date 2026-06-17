@@ -29,4 +29,20 @@ class SettlementController extends Controller
 
         return back()->with('status', 'Settlement recorded.');
     }
+
+    public function update(SettlementRequest $request, Settlement $settlement, ActivityLogService $activityLogService)
+    {
+        $settlement->update($request->validated());
+        $activityLogService->log('settlement.updated', "Updated settlement #{$settlement->id}.", $settlement);
+
+        return back()->with('status', 'Settlement updated.');
+    }
+
+    public function destroy(Settlement $settlement, ActivityLogService $activityLogService)
+    {
+        $settlement->delete();
+        $activityLogService->log('settlement.deleted', "Deleted settlement #{$settlement->id}.", $settlement);
+
+        return back()->with('status', 'Settlement deleted.');
+    }
 }

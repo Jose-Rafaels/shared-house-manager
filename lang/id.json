@@ -74,5 +74,15 @@
     "Shopping item added.": "Item belanja berhasil ditambahkan.",
     "Shopping item marked purchased.": "Item belanja ditandai sudah dibeli.",
 
-    "Please fix the errors below.": "Harap perbaiki kesalahan di bawah ini."
+    "Please fix the errors below.": "Harap perbaiki kesalahan di bawah ini.",
+
+    "Settlement updated.": "Pelunasan berhasil diperbarui.",
+    "Settlement deleted.": "Pelunasan berhasil dihapus.",
+    "Shopping item updated.": "Item belanja berhasil diperbarui.",
+    "Shopping item deleted.": "Item belanja berhasil dihapus.",
+    "Expense updated.": "Pengeluaran berhasil diperbarui.",
+    "Expense deleted.": "Pengeluaran berhasil dihapus.",
+    "Chore updated.": "Tugas berhasil diperbarui.",
+    "Chore deleted.": "Tugas berhasil dihapus.",
+    "Rotation order": "Urutan Rotasi"
 }
