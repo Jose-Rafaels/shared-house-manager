@@ -14,7 +14,7 @@ class ShoppingController extends Controller
     {
         return view('shopping.index', [
             'items' => ShoppingItem::query()->with(['addedBy', 'purchases.purchasedBy'])->latest()->get(),
-            'members' => Member::query()->orderBy('name')->get(),
+            'members' => Member::query()->active()->orderBy('name')->get(),
         ]);
     }
 
@@ -28,6 +28,12 @@ class ShoppingController extends Controller
 
     public function markPurchased(ShoppingPurchaseRequest $request, ShoppingItem $shoppingItem, ActivityLogService $activityLogService)
     {
+        abort_if(
+            $shoppingItem->purchases()->exists(),
+            422,
+            'Shopping item already purchased.'
+        );
+
         $shoppingItem->update(['purchased_at' => $request->date('purchased_on')]);
         $purchase = $shoppingItem->purchases()->create($request->validated());
         $activityLogService->log('shopping.purchase', "Marked {$shoppingItem->name} purchased.", $purchase);

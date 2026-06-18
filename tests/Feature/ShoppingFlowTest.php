@@ -50,4 +50,35 @@ class ShoppingFlowTest extends TestCase
 
         $this->assertDatabaseMissing('shopping_items', ['id' => $item->id]);
     }
+
+    public function test_shopping_item_cannot_be_purchased_twice(): void
+    {
+        $item = ShoppingItem::query()->create([
+            'name' => 'Detergent',
+            'priority' => 'High',
+        ]);
+
+        $this->post(route('shopping.purchase.store', $item), [
+            'purchased_on' => '2026-06-15',
+        ])->assertRedirect();
+
+        // Second attempt must fail.
+        $this->post(route('shopping.purchase.store', $item->fresh()), [
+            'purchased_on' => '2026-06-16',
+        ])->assertStatus(422);
+
+        $this->assertSame(1, \App\Models\ShoppingPurchase::query()->where('shopping_item_id', $item->id)->count());
+    }
+
+    public function test_future_purchase_date_is_rejected(): void
+    {
+        $item = ShoppingItem::query()->create([
+            'name' => 'Detergent',
+            'priority' => 'High',
+        ]);
+
+        $this->post(route('shopping.purchase.store', $item), [
+            'purchased_on' => '2099-01-01',
+        ])->assertSessionHasErrors('purchased_on');
+    }
 }

@@ -19,7 +19,7 @@ return new class extends Migration
         Schema::create('expenses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('payer_id')->constrained('members')->restrictOnDelete();
-            $table->foreignId('category_id')->nullable()->constrained('categories')->nullOnDelete();
+            $table->foreignId('category_id')->nullable()->constrained('categories')->restrictOnDelete();
             $table->unsignedBigInteger('amount');
             $table->text('description')->nullable();
             $table->date('expense_date');

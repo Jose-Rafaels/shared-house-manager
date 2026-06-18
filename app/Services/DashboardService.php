@@ -19,13 +19,11 @@ class DashboardService
         $monthStart = Carbon::now()->startOfMonth()->toDateString();
 
         $currentExpenses = Expense::query()
-            ->whereNotNull('category_id')
             ->whereDate('expense_date', '>=', $monthStart)
             ->with(['payer', 'splits.member', 'category'])
             ->get();
 
         $expensesTotal = Expense::query()
-            ->whereNotNull('category_id')
             ->whereDate('expense_date', '>=', $monthStart)
             ->sum('amount');
 

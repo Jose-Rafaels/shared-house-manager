@@ -19,7 +19,7 @@ class ExpenseController extends Controller
                 ->with(['payer', 'splits.member', 'category'])
                 ->latest('expense_date')
                 ->get(),
-            'members' => Member::query()->orderBy('name')->get(),
+            'members' => Member::query()->active()->orderBy('name')->get(),
             'categories' => Category::query()->orderBy('name')->get(),
         ]);
     }

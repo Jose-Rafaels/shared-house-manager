@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ShoppingItemRequest extends FormRequest
 {
@@ -17,7 +18,7 @@ class ShoppingItemRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'priority' => ['required', 'in:High,Medium,Low'],
             'notes' => ['nullable', 'string'],
-            'added_by_member_id' => ['nullable', 'integer', 'exists:members,id'],
+            'added_by_member_id' => ['nullable', 'integer', Rule::exists('members', 'id')->whereNull('deleted_at')],
         ];
     }
 }

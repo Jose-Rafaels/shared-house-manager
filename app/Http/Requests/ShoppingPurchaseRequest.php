@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ShoppingPurchaseRequest extends FormRequest
 {
@@ -14,9 +15,9 @@ class ShoppingPurchaseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'purchased_by_member_id' => ['nullable', 'integer', 'exists:members,id'],
+            'purchased_by_member_id' => ['nullable', 'integer', Rule::exists('members', 'id')->whereNull('deleted_at')],
             'amount' => ['nullable', 'integer', 'min:1'],
-            'purchased_on' => ['required', 'date'],
+            'purchased_on' => ['required', 'date', 'before_or_equal:today'],
             'notes' => ['nullable', 'string'],
         ];
     }

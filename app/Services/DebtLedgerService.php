@@ -40,9 +40,11 @@ class DebtLedgerService
             return (object) [
                 'debtor_member_id' => $share->debtor_member_id,
                 'creditor_member_id' => $share->creditor_member_id,
-                'amount' => max(0, (int) $share->total_share - $settled),
+                // Surface credit (negative) balances so overpayments are visible
+                // instead of silently dropped.
+                'amount' => (int) $share->total_share - $settled,
             ];
-        })->filter(fn ($entry) => $entry->amount > 0)->values();
+        })->values();
 
         // Eager-load member names
         $memberIds = $balances->flatMap(fn ($b) => [$b->debtor_member_id, $b->creditor_member_id])->unique();
@@ -54,5 +56,27 @@ class DebtLedgerService
 
             return $entry;
         });
+    }
+
+    /**
+     * Outstanding balance from $debtor to $creditor (excluding $ignoreSettlement for updates).
+     */
+    public function balanceBetween(int $debtorId, int $creditorId, ?int $ignoreSettlementId = null): int
+    {
+        $share = (int) ExpenseSplit::query()
+            ->join('expenses', 'expenses.id', '=', 'expense_splits.expense_id')
+            ->where('expenses.payer_id', $creditorId)
+            ->where('expense_splits.member_id', $debtorId)
+            ->sum('expense_splits.amount_owed');
+
+        $settledQuery = Settlement::query()
+            ->where('from_member_id', $debtorId)
+            ->where('to_member_id', $creditorId);
+        if ($ignoreSettlementId !== null) {
+            $settledQuery->where('id', '!=', $ignoreSettlementId);
+        }
+        $settled = (int) $settledQuery->sum('amount');
+
+        return $share - $settled;
     }
 }

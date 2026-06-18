@@ -16,7 +16,7 @@ class ChoreController extends Controller
     {
         return view('chores.index', [
             'chores' => Chore::query()->with(['rotations.member', 'assignments.member'])->latest()->get(),
-            'members' => Member::query()->orderBy('name')->get(),
+            'members' => Member::query()->active()->orderBy('name')->get(),
         ]);
     }
 
@@ -45,6 +45,12 @@ class ChoreController extends Controller
 
     public function complete(ChoreAssignment $assignment, ActivityLogService $activityLogService)
     {
+        abort_if(
+            $assignment->completed_at !== null,
+            422,
+            'Chore already completed.'
+        );
+
         $assignment->update(['completed_at' => now()]);
         $activityLogService->log('chore.completed', "Marked {$assignment->chore->name} complete.", $assignment);
 
@@ -68,8 +74,12 @@ class ChoreController extends Controller
                 ]);
             }
 
-            // Delete incomplete assignments so they get regenerated
-            $chore->assignments()->whereNull('completed_at')->delete();
+            // Delete only future, incomplete assignments so they get regenerated
+            // with the new rotation. Past history is preserved.
+            $chore->assignments()
+                ->whereNull('completed_at')
+                ->whereDate('assigned_for_date', '>=', now()->startOfWeek()->toDateString())
+                ->delete();
 
             $choreAssignmentService->ensureAssignments($chore->fresh(), 12);
             $activityLogService->log('chore.updated', "Updated chore {$chore->name}.", $chore);

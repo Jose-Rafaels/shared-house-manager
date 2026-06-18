@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Member extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'name',
         'phone',
@@ -16,6 +20,11 @@ class Member extends Model
     protected $casts = [
         'joined_at' => 'datetime',
     ];
+
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->whereNull('deleted_at');
+    }
 
     public function expensesAsPayer(): HasMany
     {

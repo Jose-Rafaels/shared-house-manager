@@ -33,9 +33,10 @@ class MemberController extends Controller
 
     public function destroy(Member $member, ActivityLogService $activityLogService)
     {
+        $name = $member->name;
         $member->delete();
-        $activityLogService->log('member.deleted', "Deleted member {$member->name}.", $member);
+        $activityLogService->log('member.archived', "Archived member {$name}.", $member);
 
-        return back()->with('status', 'Member deleted.');
+        return back()->with('status', 'Member archived.');
     }
 }
