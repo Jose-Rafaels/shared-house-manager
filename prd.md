@@ -21,7 +21,6 @@
 │                             │
 │ • Bill Module               │
 │ • Debt Module               │
-│ • Cash Fund Module          │
 │ • Chore Module              │
 │ • Shopping Module           │
 │ • Dashboard Module          │
@@ -37,7 +36,6 @@ Displays:
 
 * Current month bills
 * Unpaid bill summary
-* Cash fund balance
 * Outstanding debts
 * Current chore assignments
 * Shopping list status
@@ -97,41 +95,6 @@ Result:
 Rp60,000 each
 ```
 
-#### Shared Cash Fund Module
-
-Tracks communal money.
-
-Income:
-
-```text
-Monthly Contributions
-Additional Contributions
-```
-
-Expenses:
-
-```text
-Water Gallon
-Detergent
-Cleaning Supplies
-```
-
-Features:
-
-* Add contribution
-* Add expense
-* Upload receipt
-* Running balance
-
-Formula:
-
-```text
-Balance =
-Total Contributions
--
-Total Expenses
-```
-
 #### Debt Tracking Module
 
 Tracks personal expenses paid by one resident for multiple residents.
@@ -174,8 +137,7 @@ Features:
 Features:
 
 * Create chore
-* Define rotation order
-* Automatic assignment
+* Assign to a member
 * Mark complete
 * View history
 
@@ -188,14 +150,7 @@ Sweep Living Room
 Clean Kitchen
 ```
 
-Rotation:
-
-```text
-Week 1 → Mahdy
-Week 2 → A
-Week 3 → B
-Week 4 → C
-```
+Rotation: _(removed — chores are assigned to a single member, not rotated)_
 
 #### Shopping List Module
 

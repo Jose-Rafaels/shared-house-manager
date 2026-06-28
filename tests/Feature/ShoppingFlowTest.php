@@ -17,7 +17,11 @@ class ShoppingFlowTest extends TestCase
             'priority' => 'High',
         ])->assertRedirect();
 
-        $this->assertDatabaseHas('shopping_items', ['name' => 'Detergent']);
+        $this->assertDatabaseHas('shopping_items', [
+            'name' => 'Detergent',
+            'priority' => 'High',
+            'is_purchased' => false,
+        ]);
     }
 
     public function test_shopping_item_can_be_updated(): void
@@ -51,34 +55,19 @@ class ShoppingFlowTest extends TestCase
         $this->assertDatabaseMissing('shopping_items', ['id' => $item->id]);
     }
 
-    public function test_shopping_item_cannot_be_purchased_twice(): void
+    public function test_shopping_item_can_be_toggled_purchased(): void
     {
         $item = ShoppingItem::query()->create([
             'name' => 'Detergent',
             'priority' => 'High',
         ]);
 
-        $this->post(route('shopping.purchase.store', $item), [
-            'purchased_on' => '2026-06-15',
-        ])->assertRedirect();
+        $this->assertFalse($item->fresh()->is_purchased);
 
-        // Second attempt must fail.
-        $this->post(route('shopping.purchase.store', $item->fresh()), [
-            'purchased_on' => '2026-06-16',
-        ])->assertStatus(422);
+        $this->patch(route('shopping.togglePurchased', $item))->assertRedirect();
+        $this->assertTrue($item->fresh()->is_purchased);
 
-        $this->assertSame(1, \App\Models\ShoppingPurchase::query()->where('shopping_item_id', $item->id)->count());
-    }
-
-    public function test_future_purchase_date_is_rejected(): void
-    {
-        $item = ShoppingItem::query()->create([
-            'name' => 'Detergent',
-            'priority' => 'High',
-        ]);
-
-        $this->post(route('shopping.purchase.store', $item), [
-            'purchased_on' => '2099-01-01',
-        ])->assertSessionHasErrors('purchased_on');
+        $this->patch(route('shopping.togglePurchased', $item->fresh()))->assertRedirect();
+        $this->assertFalse($item->fresh()->is_purchased);
     }
 }

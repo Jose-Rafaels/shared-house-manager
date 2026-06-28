@@ -19,6 +19,7 @@ Route::get('/expenses', [ExpenseController::class, 'index'])->name('expenses.ind
 Route::post('/expenses', [ExpenseController::class, 'store'])->name('expenses.store');
 Route::put('/expenses/{expense}', [ExpenseController::class, 'update'])->name('expenses.update');
 Route::delete('/expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
+Route::patch('/expense-splits/{split}/settled', [ExpenseController::class, 'toggleSplit'])->name('expense-splits.toggle');
 
 Route::get('/settlements', [SettlementController::class, 'index'])->name('settlements.index');
 Route::post('/settlements', [SettlementController::class, 'store'])->name('settlements.store');
@@ -35,4 +36,4 @@ Route::get('/shopping', [ShoppingController::class, 'index'])->name('shopping.in
 Route::post('/shopping', [ShoppingController::class, 'store'])->name('shopping.store');
 Route::put('/shopping/{shoppingItem}', [ShoppingController::class, 'update'])->name('shopping.update');
 Route::delete('/shopping/{shoppingItem}', [ShoppingController::class, 'destroy'])->name('shopping.destroy');
-Route::post('/shopping/{shoppingItem}/purchase', [ShoppingController::class, 'markPurchased'])->name('shopping.purchase.store');
+Route::patch('/shopping/{shoppingItem}/toggle-purchased', [ShoppingController::class, 'togglePurchased'])->name('shopping.togglePurchased');

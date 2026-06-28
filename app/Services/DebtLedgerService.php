@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Expense;
 use App\Models\ExpenseSplit;
 use App\Models\Member;
 use App\Models\Settlement;
@@ -78,5 +79,46 @@ class DebtLedgerService
         $settled = (int) $settledQuery->sum('amount');
 
         return $share - $settled;
+    }
+
+    /**
+     * Apply a new expense share for $memberId owed to the expense's payer.
+     *
+     * If the payer already owes this member (reverse debt), net the two:
+     * record a settlement for the overlap instead of a split, so mutual
+     * debts aren't double-counted. Any leftover beyond the reverse debt
+     * becomes a normal split.
+     */
+    public function netShare(Expense $expense, int $memberId, int $share): void
+    {
+        $payerId = (int) $expense->payer_id;
+
+        if ($memberId === $payerId) {
+            $expense->splits()->create(['member_id' => $memberId, 'amount_owed' => $share]);
+
+            return;
+        }
+
+        $reverse = $this->balanceBetween($payerId, $memberId);
+
+        if ($reverse <= 0) {
+            $expense->splits()->create(['member_id' => $memberId, 'amount_owed' => $share]);
+
+            return;
+        }
+
+        $settle = min($share, $reverse);
+
+        Settlement::query()->create([
+            'from_member_id' => $payerId,
+            'to_member_id' => $memberId,
+            'amount' => $settle,
+            'settlement_date' => $expense->expense_date,
+            'note' => 'Settlement from Expense '.($expense->description ?? "#{$expense->id}"),
+        ]);
+
+        if ($share > $reverse) {
+            $expense->splits()->create(['member_id' => $memberId, 'amount_owed' => $share - $reverse]);
+        }
     }
 }

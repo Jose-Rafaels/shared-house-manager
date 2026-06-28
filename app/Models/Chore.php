@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Chore extends Model
@@ -13,16 +14,17 @@ class Chore extends Model
     protected $fillable = [
         'name',
         'description',
-        'rotation_start_date',
+        'assigned_to_member_id',
+        'assigned_for_date',
     ];
 
     protected $casts = [
-        'rotation_start_date' => 'date',
+        'assigned_for_date' => 'date',
     ];
 
-    public function rotations(): HasMany
+    public function assignedTo(): BelongsTo
     {
-        return $this->hasMany(ChoreRotation::class)->orderBy('sort_order');
+        return $this->belongsTo(Member::class, 'assigned_to_member_id');
     }
 
     public function assignments(): HasMany

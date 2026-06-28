@@ -8,15 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('chore_assignments', function (Blueprint $table) {
-            $table->unique(['chore_id', 'assigned_for_date']);
+        Schema::table('chores', function (Blueprint $table) {
+            $table->date('assigned_for_date')->nullable()->after('assigned_to_member_id');
         });
     }
 
     public function down(): void
     {
-        Schema::table('chore_assignments', function (Blueprint $table) {
-            $table->dropUnique(['chore_id', 'assigned_for_date']);
+        Schema::table('chores', function (Blueprint $table) {
+            $table->dropColumn('assigned_for_date');
         });
     }
 };

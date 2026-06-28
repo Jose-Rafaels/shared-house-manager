@@ -6,7 +6,7 @@
 
 ## Context
 
-The Shared House Manager has 6 complete modules (Housemates, Bills, Cash Fund, Debts, Chores, Shopping) but the dashboard is a static summary that gives no sense of priority, ownership, or actionability. Housemates forget to check the app because nothing pulls them back. The UI is functional but plain — no visual feedback, no quick actions, no engagement hooks.
+The Shared House Manager has 5 complete modules (Housemates, Bills, Debts, Chores, Shopping) but the dashboard is a static summary that gives no sense of priority, ownership, or actionability. Housemates forget to check the app because nothing pulls them back. The UI is functional but plain — no visual feedback, no quick actions, no engagement hooks.
 
 **Target users:** 2-5 close friends sharing one house, accessing the app equally from mobile and desktop.
 
@@ -57,7 +57,7 @@ New method `DashboardService::attentionItems()` queries across all modules and r
 ### Attention Item Structure
 
 Each item has:
-- `type`: `bill_overdue` | `bill_due_soon` | `chore_due` | `debt_settlement` | `cash_fund_low` | `shopping_high_priority`
+- `type`: `bill_overdue` | `bill_due_soon` | `chore_due` | `debt_settlement` | `shopping_high_priority`
 - `priority`: `overdue` | `due_soon` | `info`
 - `message`: Human-readable string, e.g. "Sopan belum bayar Listrik — jatuh tempo 3 hari lalu"
 - `action_url`: Route to the relevant module page
@@ -71,7 +71,7 @@ Each item has:
 | Bill participant unpaid past due date | overdue | "Sopan belum bayar Listrik — jatuh tempo 3 hari lalu" |
 | Chore assignment due tomorrow | due_soon | "Giliran Anda: Bersihkan Dapur — besok" |
 | New debt settlement received | info | "Rina menyelesaikan utang Rp 50.000 ke Anda" |
-| Cash fund balance below threshold | due_soon | "Saldo kas Rp 15.000 — rendah" |
+| Cash fund balance below threshold | _(removed — no cash fund module)_ | — |
 | Shopping items with High priority unpurchased | due_soon | "3 barang prioritas tinggi belum dibeli" |
 | Bill due this week | info | "Tagihan Internet jatuh tempo 4 hari lagi" |
 
@@ -97,12 +97,6 @@ Each item has:
 - Two-line: "Piutang (orang lain utang Anda): Rp 100k / Utang (Anda utang orang lain): Rp 50k"
 - Tap to navigate to `/debts`
 
-### Cash Fund Card
-
-- Shows: Current balance with trend indicator (↑ or ↓ this month)
-- "Saldo: Rp 350.000 ↑" (if contributions > expenses this month)
-- Tap to navigate to `/cash-fund`
-
 ### Chores Card
 
 - Shows: Weekly completion rate — "3/5 tugas selesai minggu ini"
@@ -117,7 +111,7 @@ Each item has:
 
 ### Card Layout
 
-- Desktop: 3 columns (bills, debts, chores on top; cash fund, shopping on bottom)
+- Desktop: 2 columns (bills, debts on top; chores, shopping on bottom)
 - Tablet: 2 columns
 - Mobile: 1 column, stacked
 
@@ -151,7 +145,7 @@ Each activity item shows:
 
 - Housemate avatar: Colored circle with first two letters of name, deterministic color from name hash
 - Action verbs: Indonesian, e.g. "membayar", "menyelesaikan", "menambahkan", "menyelesaikan"
-- Emojis by module: 💰 bills/payments, ✅ chores, 🟡 debts, 🛒 shopping, 💵 cash fund
+- Emojis by module: 💰 bills/payments, ✅ chores, 🟡 debts, 🛒 shopping
 - Time ago: Carbon `diffForHumans()` with `id` locale ("2 jam yang lalu", "kemarin")
 
 ### Data Source
@@ -184,7 +178,7 @@ Implementation: `AppServiceProvider` or a view composer that injects badge count
 
 ### Backend Changes
 
-- `DashboardService::attentionItems()`: New method that queries across modules. Cash fund threshold is a class constant (`CASH_FUND_LOW_THRESHOLD = 50000`, i.e. Rp 50.000)
+- `DashboardService::attentionItems()`: New method that queries across modules.
 - `DashboardService::snapshotCards()`: New method returning enriched card data (progress, net balance, completion rates)
 - View composer: Inject nav badge counts into all views
 - Existing `DashboardService::summary()`: Minor adjustments to support new rendering

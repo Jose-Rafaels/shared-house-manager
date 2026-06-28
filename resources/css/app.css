@@ -103,3 +103,16 @@ main[class*="overflow-y-auto"]::-webkit-scrollbar-thumb:hover {
 main {
   animation: content-fade-in 0.25s ease-out;
 }
+
+/* Dialog */
+dialog::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+dialog {
+    margin: auto; /* ponytail: restore native centering; Tailwind reset zeroes margin on * */
+}
+
+dialog[open] {
+    animation: content-fade-in 0.15s ease-out;
+}

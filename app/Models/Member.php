@@ -46,11 +46,6 @@ class Member extends Model
         return $this->hasMany(Settlement::class, 'to_member_id');
     }
 
-    public function choreRotations(): HasMany
-    {
-        return $this->hasMany(ChoreRotation::class, 'member_id');
-    }
-
     public function choreAssignments(): HasMany
     {
         return $this->hasMany(ChoreAssignment::class, 'member_id');

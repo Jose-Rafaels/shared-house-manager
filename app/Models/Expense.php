@@ -35,4 +35,11 @@ class Expense extends Model
     {
         return $this->hasMany(ExpenseSplit::class);
     }
+
+    public function getIsFullySettledAttribute(): bool
+    {
+        $splits = $this->splits;
+
+        return $splits->isNotEmpty() && $splits->every->is_settled;
+    }
 }

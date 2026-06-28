@@ -14,46 +14,44 @@ class ChoreFlowTest extends TestCase
     public function test_chore_can_be_created(): void
     {
         $alice = Member::query()->create(['name' => 'Alice']);
-        $bob = Member::query()->create(['name' => 'Bob']);
 
         $this->post(route('chores.store'), [
             'name' => 'Clean bathroom',
             'description' => 'Scrub the tub',
-            'rotation_start_date' => '2026-06-01',
-            'member_ids' => [$alice->id, $bob->id],
+            'assigned_to_member_id' => $alice->id,
         ])->assertRedirect();
 
-        $this->assertDatabaseHas('chores', ['name' => 'Clean bathroom']);
-        $this->assertEquals(2, Chore::first()->rotations()->count());
+        $this->assertDatabaseHas('chores', [
+            'name' => 'Clean bathroom',
+            'description' => 'Scrub the tub',
+            'assigned_to_member_id' => $alice->id,
+        ]);
     }
 
-    public function test_chore_can_be_updated_with_synced_rotations(): void
+    public function test_chore_can_be_updated(): void
     {
         $alice = Member::query()->create(['name' => 'Alice']);
         $bob = Member::query()->create(['name' => 'Bob']);
 
         $this->post(route('chores.store'), [
             'name' => 'Clean bathroom',
-            'description' => 'Scrub the tub',
-            'rotation_start_date' => '2026-06-01',
-            'member_ids' => [$alice->id, $bob->id],
+            'assigned_to_member_id' => $alice->id,
         ])->assertRedirect();
 
         $chore = Chore::first();
-        $charlie = Member::query()->create(['name' => 'Charlie']);
 
         $this->put(route('chores.update', $chore), [
             'name' => 'Clean kitchen',
             'description' => 'Wash dishes',
-            'rotation_start_date' => '2026-06-01',
-            'member_ids' => [$alice->id, $bob->id, $charlie->id],
+            'assigned_to_member_id' => $bob->id,
         ])->assertRedirect();
 
         $this->assertDatabaseHas('chores', [
             'id' => $chore->id,
             'name' => 'Clean kitchen',
+            'description' => 'Wash dishes',
+            'assigned_to_member_id' => $bob->id,
         ]);
-        $this->assertEquals(3, $chore->fresh()->rotations()->count());
     }
 
     public function test_chore_can_be_deleted(): void
@@ -62,8 +60,7 @@ class ChoreFlowTest extends TestCase
 
         $this->post(route('chores.store'), [
             'name' => 'Clean bathroom',
-            'rotation_start_date' => '2026-06-01',
-            'member_ids' => [$alice->id],
+            'assigned_to_member_id' => $alice->id,
         ])->assertRedirect();
 
         $chore = Chore::first();

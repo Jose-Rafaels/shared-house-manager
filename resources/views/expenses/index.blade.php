@@ -6,21 +6,96 @@
 @endsection
 
 @section('content')
-    <h2 class="text-3xl font-bold tracking-tight">{{ __('Expenses') }}</h2>
-    <p class="mt-1 text-slate-500">{{ __('Track shared expenses and see who owes what.') }}</p>
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-3xl font-bold tracking-tight">{{ __('Expenses') }}</h2>
+            <p class="mt-1 text-slate-500">{{ __('Track shared expenses and see who owes what.') }}</p>
+        </div>
+        <button onclick="document.getElementById('add-expense').showModal()" class="inline-flex items-center justify-center bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 min-h-[44px] rounded-lg">{{ __('Add Expense') }}</button>
+    </div>
 
-    <div class="mt-6 grid gap-6 lg:grid-cols-[420px_1fr]">
-        {{-- Create expense form --}}
-        <section class="rounded-2xl bg-white p-5 shadow-sm">
-            <h3 class="text-lg font-semibold">{{ __('Create Expense') }}</h3>
-            <form method="POST" action="{{ route('expenses.store') }}" class="mt-4 space-y-3" novalidate>
+    <section class="mt-6 rounded-2xl bg-white shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 text-slate-600">
+                    <tr>
+                        <th class="px-5 py-3 font-medium">{{ __('Description') }}</th>
+                        <th class="px-5 py-3 font-medium">{{ __('Payer') }}</th>
+                        <th class="px-5 py-3 font-medium">{{ __('Category') }}</th>
+                        <th class="px-5 py-3 font-medium">{{ __('Amount') }}</th>
+                        <th class="px-5 py-3 font-medium">{{ __('Date') }}</th>
+                        <th class="px-5 py-3 font-medium">{{ __('Split Between') }}</th>
+                        <th class="px-5 py-3 font-medium">{{ __('Actions') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($expenses as $expense)
+                        <tr class="border-t border-slate-100 hover:bg-slate-50/50 {{ $expense->is_fully_settled ? 'opacity-70' : '' }}">
+                            <td class="px-5 py-3 font-medium text-slate-900">{{ $expense->description }}</td>
+                            <td class="px-5 py-3 text-slate-600">{{ $expense->payer->name }}</td>
+                            <td class="px-5 py-3 text-slate-600">{{ $expense->category?->name ?? '—' }}</td>
+                            <td class="px-5 py-3 text-slate-900 font-medium">Rp{{ number_format($expense->amount) }}</td>
+                            <td class="px-5 py-3 text-slate-600">{{ $expense->expense_date->translatedFormat('d M Y') }}</td>
+                            <td class="px-5 py-3 text-slate-600">
+                                <ul class="space-y-1">
+                                    @foreach ($expense->splits as $split)
+                                        <li class="flex items-center gap-2 {{ $split->is_settled ? 'line-through text-slate-400' : '' }}">
+                                            <span>{{ $split->member?->name ?? '—' }}</span>
+                                            <span class="text-xs text-slate-400">Rp{{ number_format($split->amount_owed) }}</span>
+                                            <form method="POST" action="{{ route('expense-splits.toggle', $split) }}" class="inline">
+                                                @csrf @method('PATCH')
+                                                <input type="hidden" name="is_settled" value="{{ $split->is_settled ? 0 : 1 }}">
+                                                <button class="text-xs font-medium {{ $split->is_settled ? 'text-slate-500 hover:text-slate-700' : 'text-emerald-700 hover:text-emerald-800' }}">
+                                                    {{ $split->is_settled ? __('Mark unpaid') : __('Mark paid') }}
+                                                </button>
+                                            </form>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </td>
+                            <td class="px-5 py-3">
+                                @if ($expense->is_fully_settled)
+                                    <span class="inline-block rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700">{{ __('Settled') }}</span>
+                                @else
+                                    <div class="flex items-center gap-3">
+                                        <button onclick="document.getElementById('edit-expense-{{ $expense->id }}').showModal()" class="text-sm font-medium text-slate-700 hover:text-slate-900">{{ __('Edit') }}</button>
+                                        <form method="POST" action="{{ route('expenses.destroy', $expense) }}" class="inline">
+                                            @csrf @method('DELETE')
+                                            <button class="text-sm font-medium text-rose-600 hover:text-rose-800">{{ __('Delete') }}</button>
+                                        </form>
+                                    </div>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="px-5 py-12 text-center">
+                                <p class="text-sm font-medium text-slate-500">{{ __('No expenses yet.') }}</p>
+                                <p class="mt-1 text-xs text-slate-400">{{ __('Click "Add Expense" to create one.') }}</p>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    {{-- Add Expense Dialog --}}
+    <dialog id="add-expense" class="rounded-2xl p-0 shadow-xl w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold">{{ __('Create Expense') }}</h3>
+                <button type="button" onclick="document.getElementById('add-expense').close()" class="text-slate-400 hover:text-slate-600 text-2xl leading-none" aria-label="{{ __('Close') }}">×</button>
+            </div>
+            <form method="POST" action="{{ route('expenses.store') }}" class="space-y-3" novalidate>
                 @csrf
+                <input type="hidden" name="dialog_id" value="add-expense">
                 <div>
-                    <input name="description" class="w-full border @error('description') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition" placeholder="{{ __('Description') }}" value="{{ old('description') }}">
+                    <input name="description" class="w-full border @error('description') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition rounded-md px-3 py-2" placeholder="{{ __('Description') }}" value="{{ old('description') }}">
                     @error('description')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
                 </div>
                 <div>
-                    <select name="payer_id" class="w-full border @error('payer_id') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition">
+                    <select name="payer_id" class="w-full border @error('payer_id') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition rounded-md px-3 py-2">
                         <option value="">{{ __('Select payer') }}</option>
                         @foreach ($members as $member)
                             <option value="{{ $member->id }}" {{ old('payer_id') == $member->id ? 'selected' : '' }}>{{ $member->name }}</option>
@@ -29,7 +104,7 @@
                     @error('payer_id')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
                 </div>
                 <div>
-                    <select name="category_id" class="w-full border @error('category_id') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition">
+                    <select name="category_id" class="w-full border @error('category_id') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition rounded-md px-3 py-2">
                         <option value="">{{ __('No category') }}</option>
                         @foreach ($categories as $category)
                             <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
@@ -38,15 +113,15 @@
                     @error('category_id')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
                 </div>
                 <div>
-                    <input type="number" name="amount" class="w-full border @error('amount') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition" placeholder="{{ __('Amount') }}" value="{{ old('amount') }}">
+                    <input type="number" name="amount" class="w-full border @error('amount') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition rounded-md px-3 py-2" placeholder="{{ __('Amount') }}" value="{{ old('amount') }}">
                     @error('amount')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
                 </div>
                 <div>
-                    <input type="date" name="expense_date" class="w-full border @error('expense_date') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition" value="{{ old('expense_date') }}">
+                    <input type="date" name="expense_date" class="w-full border @error('expense_date') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition rounded-md px-3 py-2" value="{{ old('expense_date') }}">
                     @error('expense_date')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
                 </div>
                 <div>
-                    <textarea name="notes" class="w-full border @error('notes') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition" placeholder="{{ __('Notes') }}">{{ old('notes') }}</textarea>
+                    <textarea name="notes" class="w-full border @error('notes') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition rounded-md px-3 py-2" placeholder="{{ __('Notes') }}" rows="3">{{ old('notes') }}</textarea>
                     @error('notes')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
                 </div>
                 <div class="space-y-2">
@@ -59,62 +134,81 @@
                     @endforeach
                     @error('member_ids')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
                 </div>
-                <button class="inline-flex items-center justify-center bg-slate-900 px-5 py-3 text-base font-medium text-white transition hover:bg-slate-800 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 min-h-[44px]">{{ __('Create Expense') }}</button>
+                <button class="w-full inline-flex items-center justify-center bg-slate-900 px-5 py-3 text-base font-medium text-white transition hover:bg-slate-800 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 min-h-[44px] rounded-lg">{{ __('Create Expense') }}</button>
             </form>
-        </section>
+        </div>
+    </dialog>
 
-        {{-- Expense list --}}
-        <section class="space-y-5">
-            @forelse ($expenses as $expense)
-                <div class="rounded-2xl bg-white p-5 shadow-sm">
-                    <form method="POST" action="{{ route('expenses.update', $expense) }}" class="space-y-3" novalidate>
-                        @csrf @method('PUT')
-                        <div>
-                            <input name="description" value="{{ old('description', $expense->description) }}" class="w-full border @error('description') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition" placeholder="{{ __('Description') }}">
-                        </div>
-                        <div class="flex flex-wrap items-center gap-3">
-                            <select name="payer_id" class="border @error('payer_id') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition">
-                                @foreach ($members as $member)
-                                    <option value="{{ $member->id }}" {{ old('payer_id', $expense->payer_id) == $member->id ? 'selected' : '' }}>{{ $member->name }}</option>
-                                @endforeach
-                            </select>
-                            <select name="category_id" class="border @error('category_id') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition">
-                                <option value="">{{ __('No category') }}</option>
-                                @foreach ($categories as $category)
-                                    <option value="{{ $category->id }}" {{ old('category_id', $expense->category_id) == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
-                                @endforeach
-                            </select>
-                            <input type="number" name="amount" value="{{ old('amount', $expense->amount) }}" class="w-32 border @error('amount') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition" placeholder="{{ __('Amount') }}">
-                            <input type="date" name="expense_date" value="{{ old('expense_date', $expense->expense_date->format('Y-m-d')) }}" class="border @error('expense_date') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition">
-                        </div>
-                        <div>
-                            <textarea name="notes" class="w-full border @error('notes') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition" placeholder="{{ __('Notes') }}">{{ old('notes', $expense->notes) }}</textarea>
-                        </div>
-                        <div class="space-y-2">
-                            <p class="text-sm font-medium text-slate-700">{{ __('Split between') }}</p>
+    {{-- Edit Expense Dialogs --}}
+    @foreach ($expenses as $expense)
+        <dialog id="edit-expense-{{ $expense->id }}" class="rounded-2xl p-0 shadow-xl w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold">{{ __('Edit Expense') }}</h3>
+                    <button type="button" onclick="document.getElementById('edit-expense-{{ $expense->id }}').close()" class="text-slate-400 hover:text-slate-600 text-2xl leading-none" aria-label="{{ __('Close') }}">×</button>
+                </div>
+                <form method="POST" action="{{ route('expenses.update', $expense) }}" class="space-y-3" novalidate>
+                    @csrf @method('PUT')
+                    <input type="hidden" name="dialog_id" value="edit-expense-{{ $expense->id }}">
+                    <div>
+                        <input name="description" value="{{ old('description', $expense->description) }}" class="w-full border @error('description') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition rounded-md px-3 py-2" placeholder="{{ __('Description') }}">
+                        @error('description')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <select name="payer_id" class="w-full border @error('payer_id') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition rounded-md px-3 py-2">
                             @foreach ($members as $member)
-                                <label class="flex cursor-pointer items-center gap-2">
-                                    <input type="checkbox" name="member_ids[]" value="{{ $member->id }}" class="rounded border-slate-300" {{ in_array($member->id, old('member_ids', $expense->splits->pluck('member_id')->all())) ? 'checked' : '' }}>
-                                    {{ $member->name }}
-                                </label>
+                                <option value="{{ $member->id }}" {{ old('payer_id', $expense->payer_id) == $member->id ? 'selected' : '' }}>{{ $member->name }}</option>
                             @endforeach
-                        </div>
-                        <button class="inline-flex items-center justify-center bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 min-h-[44px]">{{ __('Update') }}</button>
-                    </form>
-                    <form method="POST" action="{{ route('expenses.destroy', $expense) }}" class="mt-2">
-                        @csrf @method('DELETE')
-                        <button class="inline-flex items-center min-h-[44px] text-sm font-medium text-rose-600 transition hover:text-rose-800 active:scale-[0.97]">{{ __('Delete') }}</button>
-                    </form>
-                </div>
-            @empty
-                <div class="rounded-2xl bg-white p-8 shadow-sm text-center">
-                    <svg class="mx-auto h-10 w-10 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                    <p class="mt-3 text-sm font-medium text-slate-500">{{ __('No expenses yet.') }}</p>
-                    <p class="mt-1 text-xs text-slate-400">{{ __('Create one using the form on the left.') }}</p>
-                </div>
-            @endforelse
-        </section>
-    </div>
+                        </select>
+                        @error('payer_id')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <select name="category_id" class="w-full border @error('category_id') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition rounded-md px-3 py-2">
+                            <option value="">{{ __('No category') }}</option>
+                            @foreach ($categories as $category)
+                                <option value="{{ $category->id }}" {{ old('category_id', $expense->category_id) == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('category_id')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <input type="number" name="amount" value="{{ old('amount', $expense->amount) }}" class="w-full border @error('amount') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition rounded-md px-3 py-2" placeholder="{{ __('Amount') }}">
+                        @error('amount')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <input type="date" name="expense_date" value="{{ old('expense_date', $expense->expense_date->format('Y-m-d')) }}" class="w-full border @error('expense_date') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition rounded-md px-3 py-2">
+                        @error('expense_date')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <textarea name="notes" class="w-full border @error('notes') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition rounded-md px-3 py-2" placeholder="{{ __('Notes') }}" rows="3">{{ old('notes', $expense->notes) }}</textarea>
+                        @error('notes')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
+                    </div>
+                    <div class="space-y-2">
+                        <p class="text-sm font-medium text-slate-700">{{ __('Split between') }}</p>
+                        @foreach ($members as $member)
+                            <label class="flex cursor-pointer items-center gap-2">
+                                <input type="checkbox" name="member_ids[]" value="{{ $member->id }}" class="rounded border-slate-300" {{ in_array($member->id, old('member_ids', $expense->splits->pluck('member_id')->all())) ? 'checked' : '' }}>
+                                {{ $member->name }}
+                            </label>
+                        @endforeach
+                        @error('member_ids')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
+                    </div>
+                    <button class="w-full inline-flex items-center justify-center bg-slate-900 px-5 py-3 text-base font-medium text-white transition hover:bg-slate-800 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 min-h-[44px] rounded-lg">{{ __('Update') }}</button>
+                </form>
+            </div>
+        </dialog>
+    @endforeach
+
+    {{-- Auto-reopen dialog on validation error --}}
+    @once
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var dialogId = @json(old('dialog_id'));
+                var dialog = dialogId && document.getElementById(dialogId);
+                if (dialog && typeof dialog.showModal === 'function') {
+                    dialog.showModal();
+                }
+            });
+        </script>
+    @endonce
 @endsection

@@ -63,6 +63,7 @@
     "Done": "Selesai",
     "Chore created.": "Tugas berhasil dibuat.",
     "Chore marked complete.": "Tugas ditandai selesai.",
+    "Date Assigned": "Tanggal Penugasan",
 
     "Add Shopping Item": "Tambah Item Belanja",
     "Detergent": "Deterjen",
@@ -84,5 +85,10 @@
     "Expense deleted.": "Pengeluaran berhasil dihapus.",
     "Chore updated.": "Tugas berhasil diperbarui.",
     "Chore deleted.": "Tugas berhasil dihapus.",
-    "Rotation order": "Urutan Rotasi"
+    "Rotation order": "Urutan Rotasi",
+
+    "Mark paid": "Tandai Lunas",
+    "Mark unpaid": "Batalkan Lunas",
+    "Settled": "Lunas",
+    "This expense is fully settled and cannot be edited.": "Pengeluaran ini sudah lunas dan tidak dapat diubah."
 }

@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ShoppingItem extends Model
 {
@@ -13,20 +12,15 @@ class ShoppingItem extends Model
         'priority',
         'notes',
         'added_by_member_id',
-        'purchased_at',
+        'is_purchased',
     ];
 
     protected $casts = [
-        'purchased_at' => 'datetime',
+        'is_purchased' => 'boolean',
     ];
 
     public function addedBy(): BelongsTo
     {
         return $this->belongsTo(Member::class, 'added_by_member_id');
-    }
-
-    public function purchases(): HasMany
-    {
-        return $this->hasMany(ShoppingPurchase::class);
     }
 }

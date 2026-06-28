@@ -17,9 +17,8 @@ class ChoreRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'rotation_start_date' => ['required', 'date'],
-            'member_ids' => ['required', 'array', 'min:1'],
-            'member_ids.*' => ['integer', Rule::exists('members', 'id')->whereNull('deleted_at')],
+            'assigned_to_member_id' => ['nullable', 'integer', Rule::exists('members', 'id')->whereNull('deleted_at')],
+            'assigned_for_date' => ['nullable', 'date'],
         ];
     }
 }

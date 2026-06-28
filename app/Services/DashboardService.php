@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\ActivityLog;
-use App\Models\ChoreAssignment;
 use App\Models\Expense;
 use App\Models\ShoppingItem;
 use Carbon\Carbon;
@@ -31,13 +30,7 @@ class DashboardService
             'currentExpenses' => $currentExpenses,
             'expensesTotal' => (int) $expensesTotal,
             'outstandingDebts' => $this->debtLedgerService->outstandingBalances(),
-            'currentChores' => ChoreAssignment::query()
-                ->with(['chore', 'member'])
-                ->whereDate('assigned_for_date', '<=', Carbon::now()->endOfWeek()->toDateString())
-                ->latest('assigned_for_date')
-                ->limit(5)
-                ->get(),
-            'shoppingPending' => ShoppingItem::query()->whereNull('purchased_at')->count(),
+            'shoppingPending' => ShoppingItem::query()->where('is_purchased', false)->count(),
             'recentActivities' => ActivityLog::query()->latest()->limit(8)->get(),
         ];
     }
