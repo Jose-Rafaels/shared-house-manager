@@ -20,10 +20,6 @@
                     @error('name')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
                 </div>
                 <div>
-                    <input name="phone" class="w-full border @error('phone') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition" placeholder="{{ __('Phone') }}" value="{{ old('phone') }}">
-                    @error('phone')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
-                </div>
-                <div>
                     <input type="date" name="joined_at" class="w-full border @error('joined_at') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition" value="{{ old('joined_at') }}">
                     @error('joined_at')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
                 </div>
@@ -40,7 +36,6 @@
                         <form method="POST" action="{{ route('members.update', $member) }}" class="flex flex-wrap items-center gap-3" novalidate>
                             @csrf @method('PUT')
                             <input name="name" value="{{ $member->name }}" class="flex-1 border-slate-300 focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition">
-                            <input name="phone" value="{{ $member->phone ?? '' }}" class="border-slate-300 focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition" placeholder="{{ __('Phone') }}">
                             <button class="inline-flex items-center justify-center bg-slate-900 px-5 py-3 text-base font-medium text-white transition hover:bg-slate-800 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 min-h-[44px]">{{ __('Update') }}</button>
                         </form>
                         <form method="POST" action="{{ route('members.destroy', $member) }}" class="mt-3">

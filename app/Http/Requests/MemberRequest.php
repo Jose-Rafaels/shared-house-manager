@@ -15,7 +15,6 @@ class MemberRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:100'],
-            'phone' => ['nullable', 'string', 'max:20'],
             'joined_at' => ['nullable', 'date'],
         ];
     }

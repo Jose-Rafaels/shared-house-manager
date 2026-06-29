@@ -14,10 +14,9 @@ class MemberFlowTest extends TestCase
     {
         $this->post(route('members.store'), [
             'name' => 'Alice',
-            'phone' => '08123456789',
         ])->assertRedirect();
 
-        $this->assertDatabaseHas('members', ['name' => 'Alice', 'phone' => '08123456789', 'deleted_at' => null]);
+        $this->assertDatabaseHas('members', ['name' => 'Alice', 'deleted_at' => null]);
 
         $member = Member::query()->first();
         $this->delete(route('members.destroy', $member))->assertRedirect();
