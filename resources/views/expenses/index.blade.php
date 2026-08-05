@@ -17,7 +17,7 @@
     <section class="mt-6 rounded-2xl bg-white shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
-                <thead class="bg-slate-50 text-slate-600">
+                <thead class="bg-slate-50 text-slate-600 hidden md:table-header-group">
                     <tr>
                         <th class="px-5 py-3 font-medium">{{ __('Description') }}</th>
                         <th class="px-5 py-3 font-medium">{{ __('Payer') }}</th>
@@ -30,7 +30,7 @@
                 </thead>
                 <tbody>
                     @forelse ($expenses as $expense)
-                        <tr class="border-t border-slate-100 hover:bg-slate-50/50">
+                        <tr class="hidden md:table-row border-t border-slate-100 hover:bg-slate-50/50">
                             <td class="px-5 py-3 font-medium text-slate-900">{{ $expense->description }}</td>
                             <td class="px-5 py-3 text-slate-600">{{ $expense->payer->name }}</td>
                             <td class="px-5 py-3 text-slate-600">{{ $expense->category?->name ?? '—' }}</td>
@@ -49,12 +49,49 @@
                             <td class="px-5 py-3">
                                 <form method="POST" action="{{ route('expenses.destroy', $expense) }}" class="inline">
                                     @csrf @method('DELETE')
-                                    <button class="text-sm font-medium text-rose-600 hover:text-rose-800">{{ __('Delete') }}</button>
+                                    <button class="inline-flex items-center justify-center min-h-[44px] px-3 text-sm font-medium text-rose-600 hover:text-rose-800 active:scale-[0.97]">{{ __('Delete') }}</button>
                                 </form>
                             </td>
                         </tr>
+
+                        {{-- Mobile card --}}
+                        <tr class="md:hidden">
+                            <td colspan="7" class="px-0 py-2">
+                                <div class="border border-slate-200 rounded-xl p-4 bg-white shadow-sm space-y-3">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <h3 class="font-semibold text-slate-900 leading-tight">{{ $expense->description }}</h3>
+                                        <span class="text-lg font-bold text-slate-900 whitespace-nowrap">Rp{{ number_format($expense->amount) }}</span>
+                                    </div>
+                                    <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-600">
+                                        <span><span class="text-slate-400">{{ __('Payer') }}:</span> {{ $expense->payer->name }}</span>
+                                        @if ($expense->category)
+                                            <span><span class="text-slate-400">{{ __('Category') }}:</span> {{ $expense->category->name }}</span>
+                                        @endif
+                                    </div>
+                                    <div class="text-sm text-slate-500">{{ $expense->expense_date->translatedFormat('d M Y') }}</div>
+                                    <ul class="space-y-1 text-sm">
+                                        @foreach ($expense->splits as $split)
+                                            <li class="flex items-center justify-between gap-2">
+                                                <span class="text-slate-700">{{ $split->member?->name ?? '—' }}</span>
+                                                <span class="text-xs text-slate-400">Rp{{ number_format($split->amount_owed) }}</span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                    <form method="POST" action="{{ route('expenses.destroy', $expense) }}">
+                                        @csrf @method('DELETE')
+                                        <button class="w-full inline-flex items-center justify-center min-h-[44px] px-3 text-sm font-medium text-rose-600 hover:text-rose-800 active:scale-[0.97] border border-rose-200 rounded-lg">{{ __('Delete') }}</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
                     @empty
-                        <tr>
+                        <tr class="hidden md:table-row">
+                            <td colspan="7" class="px-5 py-12 text-center">
+                                <p class="text-sm font-medium text-slate-500">{{ __('No expenses yet.') }}</p>
+                                <p class="mt-1 text-xs text-slate-400">{{ __('Click "Add Expense" to create one.') }}</p>
+                            </td>
+                        </tr>
+                        <tr class="md:hidden">
                             <td colspan="7" class="px-5 py-12 text-center">
                                 <p class="text-sm font-medium text-slate-500">{{ __('No expenses yet.') }}</p>
                                 <p class="mt-1 text-xs text-slate-400">{{ __('Click "Add Expense" to create one.') }}</p>
@@ -65,6 +102,8 @@
             </table>
         </div>
     </section>
+
+    {{ $expenses->links() }}
 
     {{-- Add Expense Dialog --}}
     <dialog id="add-expense" class="rounded-2xl p-0 shadow-xl w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto">
@@ -99,7 +138,7 @@
                     @error('category_id')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
                 </div>
                 <div>
-                    <input type="number" name="amount" class="w-full border @error('amount') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition rounded-md px-3 py-2" placeholder="{{ __('Amount') }}" value="{{ old('amount') }}">
+                    <input type="number" inputmode="numeric" name="amount" class="w-full border @error('amount') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition rounded-md px-3 py-2" placeholder="{{ __('Amount') }}" value="{{ old('amount') }}">
                     @error('amount')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
                 </div>
                 <div>

@@ -61,4 +61,34 @@ class ExpenseFlowTest extends TestCase
         $this->assertDatabaseMissing('expenses', ['id' => $expense->id]);
         $this->assertDatabaseMissing('expense_splits', ['expense_id' => $expense->id]);
     }
+
+    public function test_expenses_index_is_paginated(): void
+    {
+        $payer = Member::query()->create(['name' => 'Alice']);
+        $memberB = Member::query()->create(['name' => 'Bob']);
+
+        // 16 expenses, ascending dates so latest('expense_date') ordering is deterministic.
+        for ($i = 1; $i <= 16; $i++) {
+            \App\Models\Expense::query()->create([
+                'payer_id' => $payer->id,
+                'category_id' => null,
+                'amount' => 10000,
+                'description' => 'Expense-'.str_pad((string) $i, 2, '0', STR_PAD_LEFT),
+                'expense_date' => '2026-01-'.str_pad((string) $i, 2, '0', STR_PAD_LEFT),
+            ])->splits()->create([
+                'member_id' => $memberB->id,
+                'amount_owed' => 10000,
+            ]);
+        }
+
+        // Page 1 (15 per page) shows newest (Expense-16), not the oldest (Expense-01).
+        $page1 = $this->get(route('expenses.index'))->assertOk();
+        $page1->assertSee('Expense-16');
+        $page1->assertDontSee('Expense-01');
+
+        // Page 2 shows the oldest.
+        $page2 = $this->get(route('expenses.index', ['page' => 2]))->assertOk();
+        $page2->assertSee('Expense-01');
+        $page2->assertDontSee('Expense-16');
+    }
 }

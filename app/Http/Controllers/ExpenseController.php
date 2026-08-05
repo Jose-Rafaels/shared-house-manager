@@ -19,7 +19,8 @@ class ExpenseController extends Controller
             'expenses' => Expense::query()
                 ->with(['payer', 'splits.member', 'category'])
                 ->latest('expense_date')
-                ->get(),
+                ->paginate(15)
+                ->withQueryString(),
             'members' => Member::query()->active()->orderBy('name')->get(),
             'categories' => Category::query()->orderBy('name')->get(),
         ]);
@@ -39,7 +40,7 @@ class ExpenseController extends Controller
                 $debtLedgerService->netShare($expense, (int) $memberId, (int) $shares[$index]);
             }
 
-            $activityLogService->log('expense.created', "Created expense {$expense->description}.", $expense);
+            $activityLogService->log('expense.created', "Pengeluaran {$expense->description}.", $expense);
         });
 
         return back()->with('status', 'Expense created.');
