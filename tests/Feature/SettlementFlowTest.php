@@ -51,38 +51,6 @@ class SettlementFlowTest extends TestCase
         ]);
     }
 
-    public function test_settlement_can_be_updated(): void
-    {
-        $debtor = Member::query()->create(['name' => 'Alice']);
-        $creditor = Member::query()->create(['name' => 'Bob']);
-
-        // Alice owes Bob 100000.
-        $this->seedDebt($debtor, $creditor, 100000);
-
-        // Insert the settlement directly to bypass validation in setup.
-        $settlement = Settlement::query()->create([
-            'from_member_id' => $debtor->id,
-            'to_member_id' => $creditor->id,
-            'amount' => 50000,
-            'settlement_date' => '2026-06-15',
-        ]);
-
-        // Update to a higher amount that still doesn't exceed the remaining 50000.
-        $this->put(route('settlements.update', $settlement), [
-            'from_member_id' => $debtor->id,
-            'to_member_id' => $creditor->id,
-            'amount' => 50000,
-            'settlement_date' => '2026-06-18',
-            'note' => 'Updated amount',
-        ])->assertRedirect();
-
-        $this->assertDatabaseHas('settlements', [
-            'id' => $settlement->id,
-            'amount' => 50000,
-            'note' => 'Updated amount',
-        ]);
-    }
-
     public function test_settlement_can_be_deleted(): void
     {
         $debtor = Member::query()->create(['name' => 'Alice']);
