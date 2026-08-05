@@ -17,7 +17,8 @@ class SettlementController extends Controller
             'settlements' => Settlement::query()
                 ->with(['fromMember', 'toMember'])
                 ->latest('settlement_date')
-                ->get(),
+                ->paginate(15)
+                ->withQueryString(),
             'members' => Member::query()->active()->orderBy('name')->get(),
             'outstandingBalances' => $debtLedgerService->outstandingBalances(),
         ]);

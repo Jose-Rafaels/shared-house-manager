@@ -145,4 +145,31 @@ class SettlementFlowTest extends TestCase
 
         $this->assertDatabaseCount('settlements', 0);
     }
+
+    public function test_settlements_index_is_paginated(): void
+    {
+        $debtor = Member::query()->create(['name' => 'Alice']);
+        $creditor = Member::query()->create(['name' => 'Bob']);
+
+        // 16 settlements, ascending dates so latest('settlement_date') ordering is deterministic.
+        for ($i = 1; $i <= 16; $i++) {
+            Settlement::query()->create([
+                'from_member_id' => $debtor->id,
+                'to_member_id' => $creditor->id,
+                'amount' => 1000,
+                'settlement_date' => '2026-01-'.str_pad((string) $i, 2, '0', STR_PAD_LEFT),
+                'note' => 'Settlement-'.str_pad((string) $i, 2, '0', STR_PAD_LEFT),
+            ]);
+        }
+
+        // Page 1 (15 per page) shows newest (Settlement-16), not the oldest (Settlement-01).
+        $page1 = $this->get(route('settlements.index'))->assertOk();
+        $page1->assertSee('Settlement-16');
+        $page1->assertDontSee('Settlement-01');
+
+        // Page 2 shows the oldest.
+        $page2 = $this->get(route('settlements.index', ['page' => 2]))->assertOk();
+        $page2->assertSee('Settlement-01');
+        $page2->assertDontSee('Settlement-16');
+    }
 }
