@@ -21,7 +21,6 @@ Route::delete('/expenses/{expense}', [ExpenseController::class, 'destroy'])->nam
 
 Route::get('/settlements', [SettlementController::class, 'index'])->name('settlements.index');
 Route::post('/settlements', [SettlementController::class, 'store'])->name('settlements.store');
-Route::put('/settlements/{settlement}', [SettlementController::class, 'update'])->name('settlements.update');
 Route::delete('/settlements/{settlement}', [SettlementController::class, 'destroy'])->name('settlements.destroy');
 
 Route::get('/chores', [ChoreController::class, 'index'])->name('chores.index');
