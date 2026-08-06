@@ -13,25 +13,51 @@ class DashboardService
         private readonly DebtLedgerService $debtLedgerService,
     ) {}
 
-    public function summary(): array
+    public function summary(?string $month = null, ?int $categoryId = null): array
     {
-        $monthStart = Carbon::now()->startOfMonth()->toDateString();
+        $cardQuery = Expense::query();
+        $this->scopeMonth($cardQuery, $month);
+        if ($categoryId) {
+            $cardQuery->where('category_id', $categoryId);
+        }
 
-        $currentExpenses = Expense::query()
-            ->whereDate('expense_date', '>=', $monthStart)
+        $currentExpenses = (clone $cardQuery)
             ->with(['payer', 'splits.member', 'category'])
             ->get();
+        $expensesTotal = (int) (clone $cardQuery)->sum('amount');
 
-        $expensesTotal = Expense::query()
-            ->whereDate('expense_date', '>=', $monthStart)
-            ->sum('amount');
+        // Breakdown always shows every category's usage for the month
+        // (ignores the category dropdown — it is the full-usage view).
+        $breakdownQuery = Expense::query();
+        $this->scopeMonth($breakdownQuery, $month);
+
+        $categoryBreakdown = (clone $breakdownQuery)
+            ->select('category_id')
+            ->selectRaw('SUM(amount) as total, COUNT(*) as count')
+            ->groupBy('category_id')
+            ->with('category')
+            ->get();
 
         return [
             'currentExpenses' => $currentExpenses,
-            'expensesTotal' => (int) $expensesTotal,
+            'expensesTotal' => $expensesTotal,
             'outstandingDebts' => $this->debtLedgerService->outstandingBalances(),
             'shoppingPending' => ShoppingItem::query()->where('is_purchased', false)->count(),
             'recentActivities' => ActivityLog::query()->latest()->limit(8)->get(),
+            'categoryBreakdown' => $categoryBreakdown,
         ];
+    }
+
+    /**
+     * Scope a query to a YYYY-MM month. No month = all months.
+     */
+    private function scopeMonth($query, ?string $month): void
+    {
+        if (! $month) {
+            return;
+        }
+        $date = Carbon::createFromFormat('Y-m', $month);
+        $query->whereYear('expense_date', $date->year)
+            ->whereMonth('expense_date', $date->month);
     }
 }
