@@ -18,6 +18,15 @@
     "No chores assigned yet.": "Belum ada tugas yang ditetapkan.",
     "No activity yet.": "Belum ada aktivitas.",
 
+    "Month": "Bulan",
+    "Category": "Kategori",
+    "All Months": "Semua Bulan",
+    "All Categories": "Semua Kategori",
+    "Filter": "Filter",
+    "Reset": "Atur Ulang",
+    "Category Usage": "Penggunaan Kategori",
+    "No expenses in this period.": "Tidak ada pengeluaran pada periode ini.",
+
     ":debtor_name owes :creditor_name": ":debtor_name berutang kepada :creditor_name",
     ":name for week of :date": ":name untuk minggu tanggal :date",
     ":name for :date": ":name untuk :date",
@@ -50,6 +59,7 @@
     "Save": "Simpan",
     "Update": "Perbarui",
     "Delete": "Hapus",
+    "Actions": "Tindakan",
     "No members yet.": "Belum ada anggota.",
     "Member added.": "Anggota berhasil ditambahkan.",
     "Member updated.": "Anggota berhasil diperbarui.",
