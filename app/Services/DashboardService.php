@@ -60,4 +60,25 @@ class DashboardService
         $query->whereYear('expense_date', $date->year)
             ->whereMonth('expense_date', $date->month);
     }
+
+    /**
+     * Distinct months that have expenses (YYYY-MM, newest first),
+     * with the current month guaranteed to be present for navigation.
+     */
+    public function availableMonths(): \Illuminate\Support\Collection
+    {
+        $months = Expense::query()
+            ->pluck('expense_date')
+            ->map(fn ($d) => Carbon::parse($d)->format('Y-m'))
+            ->unique()
+            ->sortDesc()
+            ->values();
+
+        $current = now()->format('Y-m');
+        if (! $months->contains($current)) {
+            $months->prepend($current);
+        }
+
+        return $months;
+    }
 }

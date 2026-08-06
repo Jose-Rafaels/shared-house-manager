@@ -146,4 +146,22 @@ class DashboardServiceTest extends TestCase
 
         $this->assertCount(2, $summary['categoryBreakdown']);
     }
+
+    public function test_available_months_lists_unique_months_with_current(): void
+    {
+        $payer = Member::query()->create(['name' => 'Alice']);
+        $current = now()->format('Y-m');
+
+        Expense::query()->create(['payer_id' => $payer->id, 'category_id' => null, 'amount' => 1000, 'description' => 'a', 'expense_date' => '2026-06-10']);
+        Expense::query()->create(['payer_id' => $payer->id, 'category_id' => null, 'amount' => 1000, 'description' => 'b', 'expense_date' => '2026-06-20']);
+        Expense::query()->create(['payer_id' => $payer->id, 'category_id' => null, 'amount' => 1000, 'description' => 'c', 'expense_date' => '2026-07-10']);
+
+        $months = $this->service->availableMonths();
+
+        $this->assertTrue($months->contains('2026-06'));
+        $this->assertTrue($months->contains('2026-07'));
+        $this->assertTrue($months->contains($current));
+        // Unique: 2026-06 appears once even though two expenses fall in it.
+        $this->assertSame(1, $months->filter(fn ($m) => $m === '2026-06')->count());
+    }
 }
