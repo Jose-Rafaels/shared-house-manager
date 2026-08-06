@@ -17,7 +17,7 @@
     <section class="mt-6 rounded-2xl bg-white shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
-                <thead class="bg-slate-50 text-slate-600">
+                <thead class="bg-slate-50 text-slate-600 hidden md:table-header-group">
                     <tr>
                         <th class="px-5 py-3 font-medium">{{ __('Name') }}</th>
                         <th class="px-5 py-3 font-medium">{{ __('Assigned To') }}</th>
@@ -27,7 +27,10 @@
                 </thead>
                 <tbody>
                     @forelse ($chores as $chore)
-                        <tr class="border-t border-slate-100 hover:bg-slate-50/50">
+                        @php
+                            $nextAssignment = $chore->assignments->sortBy('assigned_for_date')->firstWhere('completed_at', null);
+                        @endphp
+                        <tr class="hidden md:table-row border-t border-slate-100 hover:bg-slate-50/50">
                             <td class="px-5 py-3 font-medium text-slate-900">{{ $chore->name }}</td>
                             <td class="px-5 py-3 text-slate-600">{{ $chore->assignedTo?->name ?? '—' }}</td>
                             <td class="px-5 py-3">
@@ -36,13 +39,10 @@
                                 @else
                                     <span class="text-slate-400">—</span>
                                 @endif
-                                @php
-                                    $nextAssignment = $chore->assignments->sortBy('assigned_for_date')->firstWhere('completed_at', null);
-                                @endphp
                                 @if ($nextAssignment)
                                     <form method="POST" action="{{ route('chores.assignments.complete', $nextAssignment) }}" class="inline ml-2">
                                         @csrf @method('PATCH')
-                                        <button class="text-xs font-medium text-emerald-700 hover:text-emerald-800">{{ __('Complete') }}</button>
+                                        <button class="inline-flex items-center justify-center min-h-[44px] px-3 text-xs font-medium text-emerald-700 hover:text-emerald-800 active:scale-[0.97]">{{ __('Complete') }}</button>
                                     </form>
                                 @endif
                             </td>
@@ -56,8 +56,45 @@
                                 </div>
                             </td>
                         </tr>
+
+                        {{-- Mobile card --}}
+                        <tr class="md:hidden">
+                            <td colspan="4" class="px-0 py-2">
+                                <div class="border border-slate-200 rounded-xl p-4 bg-white shadow-sm space-y-3">
+                                    <h3 class="font-semibold text-slate-900 leading-tight">{{ $chore->name }}</h3>
+                                    @if ($chore->description)
+                                        <p class="text-sm text-slate-600">{{ $chore->description }}</p>
+                                    @endif
+                                    <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-600">
+                                        <span><span class="text-slate-400">{{ __('Assigned To') }}:</span> {{ $chore->assignedTo?->name ?? '—' }}</span>
+                                        @if ($chore->assigned_for_date)
+                                            <span><span class="text-slate-400">{{ __('Date') }}:</span> {{ $chore->assigned_for_date->translatedFormat('d M Y') }}</span>
+                                        @endif
+                                    </div>
+                                    <div class="flex flex-wrap gap-2">
+                                        @if ($nextAssignment)
+                                            <form method="POST" action="{{ route('chores.assignments.complete', $nextAssignment) }}" class="flex-1">
+                                                @csrf @method('PATCH')
+                                                <button class="w-full inline-flex items-center justify-center min-h-[44px] px-3 text-sm font-medium text-emerald-700 border border-emerald-200 rounded-lg active:scale-[0.97]">{{ __('Complete') }}</button>
+                                            </form>
+                                        @endif
+                                        <button onclick="document.getElementById('edit-chore-{{ $chore->id }}').showModal()" class="flex-1 inline-flex items-center justify-center min-h-[44px] px-3 text-sm font-medium text-slate-700 border border-slate-300 rounded-lg active:scale-[0.97]">{{ __('Edit') }}</button>
+                                        <form method="POST" action="{{ route('chores.destroy', $chore) }}" class="flex-1">
+                                            @csrf @method('DELETE')
+                                            <button class="w-full inline-flex items-center justify-center min-h-[44px] px-3 text-sm font-medium text-rose-600 border border-rose-200 rounded-lg active:scale-[0.97]">{{ __('Delete') }}</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
                     @empty
-                        <tr>
+                        <tr class="hidden md:table-row">
+                            <td colspan="4" class="px-5 py-12 text-center">
+                                <p class="text-sm font-medium text-slate-500">{{ __('No chores yet.') }}</p>
+                                <p class="mt-1 text-xs text-slate-400">{{ __('Click "Add Chore" to create one.') }}</p>
+                            </td>
+                        </tr>
+                        <tr class="md:hidden">
                             <td colspan="4" class="px-5 py-12 text-center">
                                 <p class="text-sm font-medium text-slate-500">{{ __('No chores yet.') }}</p>
                                 <p class="mt-1 text-xs text-slate-400">{{ __('Click "Add Chore" to create one.') }}</p>
@@ -79,28 +116,18 @@
             <form method="POST" action="{{ route('chores.store') }}" class="space-y-3" novalidate>
                 @csrf
                 <input type="hidden" name="dialog_id" value="add-chore">
-                <div>
-                    <input name="name" class="w-full border @error('name') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition rounded-md px-3 py-2" placeholder="{{ __('Clean bathroom') }}" value="{{ old('name') }}">
-                    @error('name')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
-                </div>
-                <div>
-                    <textarea name="description" class="w-full border @error('description') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition rounded-md px-3 py-2" placeholder="{{ __('Description') }}" rows="3">{{ old('description') }}</textarea>
-                    @error('description')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">{{ __('Date Assigned') }}</label>
-                    <input type="date" name="assigned_for_date" value="{{ old('assigned_for_date', today()->toDateString()) }}" class="w-full border @error('assigned_for_date') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition rounded-md px-3 py-2">
-                    @error('assigned_for_date')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
-                </div>
-                <div>
-                    <select name="assigned_to_member_id" class="w-full border-slate-300 focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition rounded-md px-3 py-2">
-                        <option value="">{{ __('Unassigned') }}</option>
-                        @foreach ($members as $member)
-                            <option value="{{ $member->id }}" {{ old('assigned_to_member_id') == $member->id ? 'selected' : '' }}>{{ $member->name }}</option>
-                        @endforeach
-                    </select>
-                    @error('assigned_to_member_id')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
-                </div>
+                <x-floating-field name="name" label="Name" :value="old('name')" />
+
+                <x-floating-field name="description" label="Description" as="textarea" :value="old('description')" />
+
+                <x-floating-field name="assigned_for_date" label="Date Assigned" type="date" :value="old('assigned_for_date', today()->toDateString())" />
+
+                <x-floating-field name="assigned_to_member_id" label="Assigned to" as="select">
+                    <option value="">{{ __('Unassigned') }}</option>
+                    @foreach ($members as $member)
+                        <option value="{{ $member->id }}" {{ old('assigned_to_member_id') == $member->id ? 'selected' : '' }}>{{ $member->name }}</option>
+                    @endforeach
+                </x-floating-field>
                 <button class="w-full inline-flex items-center justify-center bg-slate-900 px-5 py-3 text-base font-medium text-white transition hover:bg-slate-800 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 min-h-[44px] rounded-lg">{{ __('Create Chore') }}</button>
             </form>
         </div>
@@ -117,28 +144,18 @@
                 <form method="POST" action="{{ route('chores.update', $chore) }}" class="space-y-3" novalidate>
                     @csrf @method('PUT')
                     <input type="hidden" name="dialog_id" value="edit-chore-{{ $chore->id }}">
-                    <div>
-                        <input name="name" value="{{ old('name', $chore->name) }}" class="w-full border @error('name') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition rounded-md px-3 py-2" placeholder="{{ __('Clean bathroom') }}">
-                        @error('name')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
-                    </div>
-                    <div>
-                        <textarea name="description" class="w-full border @error('description') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition rounded-md px-3 py-2" placeholder="{{ __('Description') }}" rows="3">{{ old('description', $chore->description) }}</textarea>
-                        @error('description')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">{{ __('Date Assigned') }}</label>
-                        <input type="date" name="assigned_for_date" value="{{ old('assigned_for_date', $chore->assigned_for_date?->toDateString()) }}" class="w-full border @error('assigned_for_date') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition rounded-md px-3 py-2">
-                        @error('assigned_for_date')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
-                    </div>
-                    <div>
-                        <select name="assigned_to_member_id" class="w-full border-slate-300 focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition rounded-md px-3 py-2">
-                            <option value="">{{ __('Unassigned') }}</option>
-                            @foreach ($members as $member)
-                                <option value="{{ $member->id }}" {{ old('assigned_to_member_id', $chore->assigned_to_member_id) == $member->id ? 'selected' : '' }}>{{ $member->name }}</option>
-                            @endforeach
-                        </select>
-                        @error('assigned_to_member_id')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
-                    </div>
+                    <x-floating-field name="name" label="Name" :value="old('name', $chore->name)" />
+
+                    <x-floating-field name="description" label="Description" as="textarea" :value="old('description', $chore->description)" />
+
+                    <x-floating-field name="assigned_for_date" label="Date Assigned" type="date" :value="old('assigned_for_date', $chore->assigned_for_date?->toDateString())" />
+
+                    <x-floating-field name="assigned_to_member_id" label="Assigned to" as="select">
+                        <option value="">{{ __('Unassigned') }}</option>
+                        @foreach ($members as $member)
+                            <option value="{{ $member->id }}" {{ old('assigned_to_member_id', $chore->assigned_to_member_id) == $member->id ? 'selected' : '' }}>{{ $member->name }}</option>
+                        @endforeach
+                    </x-floating-field>
                     <button class="w-full inline-flex items-center justify-center bg-slate-900 px-5 py-3 text-base font-medium text-white transition hover:bg-slate-800 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 min-h-[44px] rounded-lg">{{ __('Update') }}</button>
                 </form>
             </div>

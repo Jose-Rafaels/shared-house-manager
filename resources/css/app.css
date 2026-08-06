@@ -116,3 +116,9 @@ dialog {
 dialog[open] {
     animation: content-fade-in 0.15s ease-out;
 }
+
+/* Touch target utility — 44×44 minimum for accessible mobile taps */
+.touch-target {
+    min-height: 44px;
+    min-width: 44px;
+}

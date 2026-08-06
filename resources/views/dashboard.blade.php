@@ -30,7 +30,6 @@
         </div>
         <div class="flex items-center gap-2">
             <button type="submit" class="inline-flex items-center justify-center bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 active:scale-[0.97] rounded-lg min-h-[44px]">{{ __('Filter') }}</button>
-            <a href="{{ route('dashboard') }}" class="px-4 py-2 text-sm text-slate-600 hover:text-slate-900">{{ __('Reset') }}</a>
         </div>
     </form>
 

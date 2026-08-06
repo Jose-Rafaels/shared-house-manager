@@ -12,7 +12,7 @@
         {{-- Logo/Brand --}}
         <div class="flex flex-col items-start gap-1 px-6 py-6 border-b border-slate-800">
             <h1 class="text-xl font-bold">{{ __('Shared House Manager') }}</h1>
-            <p class="text-sm text-slate-400">{{ __('Expenses, debts, chores, shopping, and shared cash') }}</p>
+            <p class="text-sm text-slate-400">{{ __('Expenses, debts, chores and shopping') }}</p>
         </div>
 
         {{-- Navigation Links --}}

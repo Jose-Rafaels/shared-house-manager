@@ -15,14 +15,9 @@
             <h3 class="text-lg font-semibold">{{ __('Add Member') }}</h3>
             <form method="POST" action="{{ route('members.store') }}" class="mt-4 space-y-4" novalidate>
                 @csrf
-                <div>
-                    <input name="name" class="w-full border @error('name') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition" placeholder="{{ __('Name') }}" value="{{ old('name') }}">
-                    @error('name')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
-                </div>
-                <div>
-                    <input type="date" name="joined_at" class="w-full border @error('joined_at') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition" value="{{ old('joined_at') }}">
-                    @error('joined_at')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
-                </div>
+                <x-floating-field name="name" label="Name" :value="old('name')" />
+
+                <x-floating-field name="joined_at" label="Joined at" type="date" :value="old('joined_at')" />
                 <button class="inline-flex items-center justify-center bg-slate-900 px-5 py-3 text-base font-medium text-white transition hover:bg-slate-800 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 min-h-[44px]">{{ __('Save') }}</button>
             </form>
         </section>
@@ -32,27 +27,60 @@
             <h3 class="text-lg font-semibold">{{ __('Members') }}</h3>
             <div class="mt-4 space-y-3">
                 @forelse ($members as $member)
-                    <div class="border border-slate-200 p-4">
-                        <form method="POST" action="{{ route('members.update', $member) }}" class="flex flex-wrap items-center gap-3" novalidate>
-                            @csrf @method('PUT')
-                            <input name="name" value="{{ $member->name }}" class="flex-1 border-slate-300 focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition">
-                            <button class="inline-flex items-center justify-center bg-slate-900 px-5 py-3 text-base font-medium text-white transition hover:bg-slate-800 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 min-h-[44px]">{{ __('Update') }}</button>
-                        </form>
-                        <form method="POST" action="{{ route('members.destroy', $member) }}" class="mt-3">
+                    <div class="flex items-center justify-between gap-3 border border-slate-200 p-4">
+                        <div class="flex-1">
+                            <div class="font-medium text-slate-900">{{ $member->name }}</div>
+                            @if ($member->joined_at)
+                                <div class="text-xs text-slate-500">{{ __('Joined') }} {{ $member->joined_at->translatedFormat('d M Y') }}</div>
+                            @endif
+                        </div>
+                        <button onclick="document.getElementById('edit-member-{{ $member->id }}').showModal()" class="inline-flex items-center justify-center min-h-[44px] px-3 text-sm font-medium text-slate-700 hover:text-slate-900 active:scale-[0.97]">{{ __('Edit') }}</button>
+                        <form method="POST" action="{{ route('members.destroy', $member) }}">
                             @csrf @method('DELETE')
-                            <button class="inline-flex items-center min-h-[44px] text-sm font-medium text-rose-600 transition hover:text-rose-800 active:scale-[0.97]">{{ __('Delete') }}</button>
+                            <button class="inline-flex items-center justify-center min-h-[44px] px-3 text-sm font-medium text-rose-600 transition hover:text-rose-800 active:scale-[0.97]">{{ __('Delete') }}</button>
                         </form>
                     </div>
+
+                    {{-- Edit Member Dialog --}}
+                    <dialog id="edit-member-{{ $member->id }}" class="rounded-2xl p-0 shadow-xl w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold">{{ __('Edit Member') }}</h3>
+                                <button type="button" onclick="document.getElementById('edit-member-{{ $member->id }}').close()" class="text-slate-400 hover:text-slate-600 text-2xl leading-none" aria-label="{{ __('Close') }}">×</button>
+                            </div>
+                            <form method="POST" action="{{ route('members.update', $member) }}" class="space-y-3" novalidate>
+                                @csrf @method('PUT')
+                                <input type="hidden" name="dialog_id" value="edit-member-{{ $member->id }}">
+                                <x-floating-field name="name" label="Name" :value="old('name', $member->name)" />
+
+                                <x-floating-field name="joined_at" label="Joined at" type="date" :value="old('joined_at', $member->joined_at?->toDateString())" />
+                                <button class="w-full inline-flex items-center justify-center bg-slate-900 px-5 py-3 text-base font-medium text-white transition hover:bg-slate-800 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 min-h-[44px] rounded-lg">{{ __('Update') }}</button>
+                            </form>
+                        </div>
+                    </dialog>
                 @empty
                     <div class="py-8 text-center">
                         <svg class="mx-auto h-8 w-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                         </svg>
                         <p class="mt-3 text-sm font-medium text-slate-500">{{ __('No members yet.') }}</p>
-                        <p class="mt-1 text-xs text-slate-400">{{ __('Add one using the form on the left.') }}</p>
+                        <p class="mt-1 text-xs text-slate-400">{{ __('Add one using the form above.') }}</p>
                     </div>
                 @endforelse
             </div>
         </section>
     </div>
+
+    {{-- Auto-reopen dialog on validation error --}}
+    @once
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var dialogId = @json(old('dialog_id'));
+                var dialog = dialogId && document.getElementById(dialogId);
+                if (dialog && typeof dialog.showModal === 'function') {
+                    dialog.showModal();
+                }
+            });
+        </script>
+    @endonce
 @endsection

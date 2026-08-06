@@ -114,7 +114,7 @@ class DebtLedgerService
             'to_member_id' => $memberId,
             'amount' => $settle,
             'settlement_date' => $expense->expense_date,
-            'note' => 'Settlement from Expense '.($expense->description ?? "#{$expense->id}"),
+            'note' => 'Pelunasan dari expense'.($expense->description ?? "#{$expense->id}"),
         ]);
 
         if ($share > $reverse) {

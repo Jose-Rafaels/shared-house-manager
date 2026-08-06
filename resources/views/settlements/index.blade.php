@@ -16,15 +16,29 @@
 
     {{-- Outstanding Balances --}}
     @if ($outstandingBalances->count())
-        <section class="mt-6 rounded-2xl bg-white p-5 shadow-sm">
-            <h3 class="text-lg font-semibold">{{ __('Outstanding Balances') }}</h3>
-            <div class="mt-4 space-y-3">
-                @foreach ($outstandingBalances as $entry)
-                    <div class="flex items-center justify-between bg-slate-50 px-4 py-3 rounded-lg">
-                        <span>{{ $entry->debtor_name }} → {{ $entry->creditor_name }}</span>
-                        <strong>Rp{{ number_format($entry->amount) }}</strong>
-                    </div>
-                @endforeach
+        <section class="mt-6 rounded-2xl bg-white shadow-sm overflow-hidden">
+            <div class="px-5 py-4 border-b border-slate-100">
+                <h3 class="text-lg font-semibold">{{ __('Outstanding Balances') }}</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50 text-slate-600">
+                        <tr>
+                            <th class="px-5 py-3 font-medium">{{ __('From (debtor)') }}</th>
+                            <th class="px-5 py-3 font-medium">{{ __('To (creditor)') }}</th>
+                            <th class="px-5 py-3 font-medium">{{ __('Amount') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($outstandingBalances as $entry)
+                            <tr class="border-t border-slate-100">
+                                <td class="px-5 py-3 text-slate-600">{{ $entry->debtor_name }}</td>
+                                <td class="px-5 py-3 text-slate-600">{{ $entry->creditor_name }}</td>
+                                <td class="px-5 py-3 text-slate-900 font-medium tabular-nums">Rp{{ number_format($entry->amount) }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
         </section>
     @endif
@@ -33,7 +47,7 @@
     <section class="mt-6 rounded-2xl bg-white shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
-                <thead class="bg-slate-50 text-slate-600 hidden md:table-header-group">
+                <thead class="bg-slate-50 text-slate-600">
                     <tr>
                         <th class="px-5 py-3 font-medium">{{ __('From → To') }}</th>
                         <th class="px-5 py-3 font-medium">{{ __('Amount') }}</th>
@@ -44,48 +58,25 @@
                 </thead>
                 <tbody>
                     @forelse ($settlements as $settlement)
-                        <tr class="hidden md:table-row border-t border-slate-100 hover:bg-slate-50/50">
+                        <tr class="border-t border-slate-100 hover:bg-slate-50/50">
                             <td class="px-5 py-3 font-medium text-slate-900">{{ $settlement->fromMember->name }} → {{ $settlement->toMember->name }}</td>
-                            <td class="px-5 py-3 text-slate-900 font-medium">Rp{{ number_format($settlement->amount) }}</td>
+                            <td class="px-5 py-3 text-slate-900 font-medium tabular-nums">Rp{{ number_format($settlement->amount) }}</td>
                             <td class="px-5 py-3 text-slate-600">{{ $settlement->settlement_date->translatedFormat('d M Y') }}</td>
                             <td class="px-5 py-3 text-slate-600">{{ \Illuminate\Support\Str::limit($settlement->note, 60) }}</td>
                             <td class="px-5 py-3">
                                 <form method="POST" action="{{ route('settlements.destroy', $settlement) }}" class="inline">
-                                    @csrf @method('DELETE')
-                                    <button class="text-sm font-medium text-rose-600 hover:text-rose-800">{{ __('Delete') }}</button>
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" aria-label="{{ __('Delete') }}" class="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-lg text-slate-400 transition hover:text-rose-600 hover:bg-rose-50 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300 focus-visible:ring-offset-1">
+                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"/>
+                                        </svg>
+                                    </button>
                                 </form>
                             </td>
                         </tr>
-
-                        {{-- Mobile card --}}
-                        <tr class="md:hidden">
-                            <td colspan="5" class="px-0 py-2">
-                                <div class="border border-slate-200 rounded-xl p-4 bg-white shadow-sm space-y-3">
-                                    <div class="flex items-start justify-between gap-3">
-                                        <h3 class="font-semibold text-slate-900 leading-tight">{{ $settlement->fromMember->name }} → {{ $settlement->toMember->name }}</h3>
-                                        <span class="text-lg font-bold text-slate-900 whitespace-nowrap">Rp{{ number_format($settlement->amount) }}</span>
-                                    </div>
-                                    <div class="text-sm text-slate-500">{{ $settlement->settlement_date->translatedFormat('d M Y') }}</div>
-                                    @if ($settlement->note)
-                                        <p class="text-sm text-slate-600">{{ \Illuminate\Support\Str::limit($settlement->note, 120) }}</p>
-                                    @endif
-                                    <div>
-                                        <form method="POST" action="{{ route('settlements.destroy', $settlement) }}">
-                                            @csrf @method('DELETE')
-                                            <button class="w-full inline-flex items-center justify-center min-h-[44px] px-3 text-sm font-medium text-rose-600 hover:text-rose-800 active:scale-[0.97] border border-rose-200 rounded-lg">{{ __('Delete') }}</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
                     @empty
-                        <tr class="hidden md:table-row">
-                            <td colspan="5" class="px-5 py-12 text-center">
-                                <p class="text-sm font-medium text-slate-500">{{ __('No settlements yet.') }}</p>
-                                <p class="mt-1 text-xs text-slate-400">{{ __('Click "Record Settlement" to add one.') }}</p>
-                            </td>
-                        </tr>
-                        <tr class="md:hidden">
+                        <tr>
                             <td colspan="5" class="px-5 py-12 text-center">
                                 <p class="text-sm font-medium text-slate-500">{{ __('No settlements yet.') }}</p>
                                 <p class="mt-1 text-xs text-slate-400">{{ __('Click "Record Settlement" to add one.') }}</p>
@@ -109,36 +100,25 @@
             <form method="POST" action="{{ route('settlements.store') }}" class="space-y-3" novalidate>
                 @csrf
                 <input type="hidden" name="dialog_id" value="add-settlement">
-                <div>
-                    <select name="from_member_id" class="w-full border @error('from_member_id') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition rounded-md px-3 py-2">
-                        <option value="">{{ __('From (debtor)') }}</option>
-                        @foreach ($members as $member)
-                            <option value="{{ $member->id }}" {{ old('from_member_id') == $member->id ? 'selected' : '' }}>{{ $member->name }}</option>
-                        @endforeach
-                    </select>
-                    @error('from_member_id')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
-                </div>
-                <div>
-                    <select name="to_member_id" class="w-full border @error('to_member_id') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition rounded-md px-3 py-2">
-                        <option value="">{{ __('To (creditor)') }}</option>
-                        @foreach ($members as $member)
-                            <option value="{{ $member->id }}" {{ old('to_member_id') == $member->id ? 'selected' : '' }}>{{ $member->name }}</option>
-                        @endforeach
-                    </select>
-                    @error('to_member_id')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
-                </div>
-                <div>
-                    <input type="number" inputmode="numeric" name="amount" class="w-full border @error('amount') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition rounded-md px-3 py-2" placeholder="{{ __('Amount') }}" value="{{ old('amount') }}">
-                    @error('amount')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
-                </div>
-                <div>
-                    <input type="date" name="settlement_date" class="w-full border @error('settlement_date') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition rounded-md px-3 py-2" value="{{ old('settlement_date') }}">
-                    @error('settlement_date')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
-                </div>
-                <div>
-                    <textarea name="note" class="w-full border @error('note') border-rose-500 @else border-slate-300 @enderror focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition rounded-md px-3 py-2" placeholder="{{ __('Note (optional)') }}" rows="3">{{ old('note') }}</textarea>
-                    @error('note')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
-                </div>
+                <x-floating-field name="from_member_id" label="From (debtor)" as="select">
+                    <option value="">—</option>
+                    @foreach ($members as $member)
+                        <option value="{{ $member->id }}" {{ old('from_member_id') == $member->id ? 'selected' : '' }}>{{ $member->name }}</option>
+                    @endforeach
+                </x-floating-field>
+
+                <x-floating-field name="to_member_id" label="To (creditor)" as="select">
+                    <option value="">—</option>
+                    @foreach ($members as $member)
+                        <option value="{{ $member->id }}" {{ old('to_member_id') == $member->id ? 'selected' : '' }}>{{ $member->name }}</option>
+                    @endforeach
+                </x-floating-field>
+
+                <x-floating-field name="amount" label="Amount" type="number" inputmode="numeric" :value="old('amount')" />
+
+                <x-floating-field name="settlement_date" label="Date" type="date" :value="old('settlement_date')" />
+
+                <x-floating-field name="note" label="Note (optional)" as="textarea" :value="old('note')" />
                 <button class="w-full inline-flex items-center justify-center bg-slate-900 px-5 py-3 text-base font-medium text-white transition hover:bg-slate-800 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 min-h-[44px] rounded-lg">{{ __('Record Settlement') }}</button>
             </form>
         </div>
